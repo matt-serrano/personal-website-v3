@@ -48,9 +48,9 @@ export function ContactSection() {
               <h2 className="mb-2 font-sans text-4xl font-light leading-[1.05] tracking-tight text-foreground md:mb-3 md:text-7xl lg:text-8xl">
                 Let's
                 <br />
-                talk
+                Connect
               </h2>
-              <p className="font-mono text-xs text-foreground/60 md:text-base">/ Get in touch</p>
+              <p className="font-mono text-xs text-foreground/60 md:text-base">Get in touch</p>
             </div>
 
             <div className="space-y-4 md:space-y-8">
@@ -66,7 +66,7 @@ export function ContactSection() {
                   <span className="font-mono text-xs text-foreground/60">Email</span>
                 </div>
                 <p className="text-base text-foreground transition-colors group-hover:text-foreground/70 md:text-2xl">
-                  hello@studio.com
+                  mattsrano@gmail.com
                 </p>
               </a>
 
@@ -80,7 +80,7 @@ export function ContactSection() {
                   <MapPin className="h-3 w-3 text-foreground/60" />
                   <span className="font-mono text-xs text-foreground/60">Location</span>
                 </div>
-                <p className="text-base text-foreground md:text-2xl">New York, NY</p>
+                <p className="text-base text-foreground md:text-2xl">Toronto, ON, Canada</p>
               </div>
 
               <div
@@ -89,7 +89,7 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "500ms" }}
               >
-                {["Twitter", "Instagram", "LinkedIn", "Dribbble"].map((social, i) => (
+                {["Email", "GitHub", "LinkedIn"].map((social, i) => (
                   <a
                     key={social}
                     href="#"

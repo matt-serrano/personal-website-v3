@@ -220,7 +220,7 @@ export default function Home() {
         <div className="hidden lg:block lg:w-[124px]" aria-hidden="true" />
 
         <div className="hidden items-center gap-5 lg:flex xl:gap-8">
-          {["Home", "Experience", "Projects", "Extracurriculars", "Contact"].map((item, index) => (
+          {["Home", "Experience", "Projects", "About Me", "Contact"].map((item, index) => (
             <button
               suppressHydrationWarning
               key={item}

@@ -17,34 +17,34 @@ export function ServicesSection() {
           }`}
         >
           <h2 className="mb-2 font-sans text-5xl font-light tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Capabilities
+            Projects
           </h2>
-          <p className="font-mono text-sm text-foreground/60 md:text-base">/ What we bring to the table</p>
+          <p className="font-mono text-sm text-foreground/60 md:text-base">Some things I created</p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 md:gap-x-16 md:gap-y-12 lg:gap-x-24">
           {[
             {
-              title: "Creative Development",
-              description: "Pushing the boundaries of what's possible on the web",
-              direction: "top",
-            },
-            {
-              title: "Visual Design",
-              description: "Crafting memorable experiences through thoughtful aesthetics",
-              direction: "right",
-            },
-            {
-              title: "Motion & Animation",
-              description: "Bringing interfaces to life with purposeful movement",
-              direction: "left",
-            },
-            {
-              title: "Technical Strategy",
-              description: "Building scalable solutions that perform beautifully",
-              direction: "bottom",
-            },
-          ].map((service, i) => (
+                title: "AI-Powered Finance Application",
+                description: "Analyzing financial data with AI to deliver insights and forecasts. (HackHive 2026)",
+                direction: "top",
+              },
+              {
+                title: "Car Catalog Application",
+                description: "Designing a full-stack platform for browsing and managing car listings.",
+                direction: "right",
+              },
+              {
+                title: "Baseball Pitch Sign Detector",
+                description: "Using computer vision to detect and interpret pitch signals in real time.",
+                direction: "left",
+              },
+              {
+                title: "Purchs V2 Marketplace Redesign",
+                description: "Redesigning a marketplace with improved UX and scalable architecture.",
+                direction: "bottom",
+              },
+                        ].map((service, i) => (
             <ServiceCard key={i} service={service} index={i} isVisible={isVisible} />
           ))}
         </div>

@@ -17,32 +17,32 @@ export function WorkSection() {
           }`}
         >
           <h2 className="mb-2 font-sans text-5xl font-light tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Featured
+            Experience
           </h2>
-          <p className="font-mono text-sm text-foreground/60 md:text-base">/ Recent explorations</p>
+          <p className="font-mono text-sm text-foreground/60 md:text-base">My Work Experience</p>
         </div>
 
         <div className="space-y-6 md:space-y-8">
           {[
             {
               number: "01",
-              title: "Kinetic Typography",
-              category: "Interactive Experience",
-              year: "2024",
+              title: "IT Systems Analyst | Developer",
+              category: "Ontario Public Service | Government of Ontario",
+              year: "May 2026 - Present",
               direction: "left",
             },
             {
               number: "02",
-              title: "Generative Patterns",
-              category: "Visual System",
-              year: "2024",
+              title: "Software Engineer",
+              category: "Purchs | AI Wholesale Platform for CPG Brands & Retailers",
+              year: "November 2025 - March 2026",
               direction: "right",
             },
             {
               number: "03",
-              title: "Spatial Interface",
-              category: "3D Navigation",
-              year: "2023",
+              title: "Barista",
+              category: "Chatime",
+              year: "June 2024 - April 2026",
               direction: "left",
             },
           ].map((project, i) => (

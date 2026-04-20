@@ -21,11 +21,9 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
               }`}
             >
               <h2 className="mb-3 font-sans text-3xl font-light leading-[1.1] tracking-tight text-foreground md:mb-4 md:text-6xl lg:text-7xl">
-                Building the
+                Who am I?
                 <br />
-                future of
-                <br />
-                <span className="text-foreground/40">digital</span>
+                {/* <span className="text-foreground/40">digital</span> */}
               </h2>
             </div>
 
@@ -36,11 +34,10 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
               style={{ transitionDelay: "200ms" }}
             >
               <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                We're a collective of designers, developers, and creative technologists obsessed with crafting
-                exceptional digital experiences.
+                I have experience across multiple programming languages with a focus on software development and building practical, well-designed systems. 
               </p>
               <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                Every project is an opportunity to explore new possibilities and push creative boundaries.
+                Aside from tech, I am a black belt in judo and purple belt in Brazilian jiu-jitsu, bringing discipline and consistency into every area. 
               </p>
             </div>
           </div>
