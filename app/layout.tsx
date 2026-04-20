@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "Matthew Serrano",
   description: "Created with v0",
   generator: "v0.app",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/apple-icon.png",
+  },
 }
 
 const devRuntimeGuardScript = `

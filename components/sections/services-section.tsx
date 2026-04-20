@@ -1,6 +1,7 @@
 "use client"
 
 import { useReveal } from "@/hooks/use-reveal"
+import { ExternalLink } from "lucide-react"
 
 export function ServicesSection() {
   const { ref, isVisible } = useReveal(0.3)
@@ -103,15 +104,20 @@ function ServiceCard({
             href={service.href}
             target="_blank"
             rel="noreferrer"
-            className="project-hover-link translate-x-1 font-mono text-xs text-foreground/0 underline underline-offset-4 transition-all duration-300 group-hover:translate-x-0 group-hover:text-foreground/70"
+            aria-label={hoverText}
+            className="project-hover-link translate-x-1 font-mono text-xs text-foreground/0 underline underline-offset-4 transition-all duration-300 group-hover:translate-x-0 group-hover:text-foreground/70 touch:no-underline"
           >
             <span className="touch:hidden">{hoverText}</span>
-            <span className="hidden touch:inline">Check it out</span>
+            <span className="hidden items-center touch:inline-flex" aria-hidden="true">
+              <ExternalLink className="h-4 w-4" strokeWidth={1.8} />
+            </span>
           </a>
         ) : (
           <span className="project-hover-link translate-x-1 font-mono text-xs text-foreground/0 transition-all duration-300 group-hover:translate-x-0 group-hover:text-foreground/70">
             <span className="underline underline-offset-4 touch:hidden">{hoverText}</span>
-            <span className="hidden underline underline-offset-4 touch:inline">Check it out</span>
+            <span className="hidden items-center touch:inline-flex" aria-hidden="true">
+              <ExternalLink className="h-4 w-4" strokeWidth={1.8} />
+            </span>
           </span>
         )}
       </div>

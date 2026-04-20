@@ -226,7 +226,7 @@ export default function Home() {
           >
             &lt;-
           </button>
-          <img src="/otu-logo.png" alt="Ontario Tech University" className="h-6 w-auto object-contain md:h-8" />
+          <img src="/otu-logo.png" alt="Ontario Tech University" className="h-5 w-auto object-contain md:h-6" />
           <button
             suppressHydrationWarning
             type="button"
