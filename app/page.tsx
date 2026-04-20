@@ -182,9 +182,9 @@ export default function Home() {
         className={`fixed inset-0 z-0 transition-opacity duration-700 ${isLoaded ? "opacity-100" : "opacity-0"}`}
         style={{ contain: "strict" }}
       >
-        <Shader className="h-full w-full">
+        <Shader className="h-full w-full" hideNotice>
           <Swirl
-            colorA="#1275d8"
+            colorA="#00a6fb"
             colorB="#1b1028"
             speed={0.8}
             detail={0.8}
@@ -197,9 +197,9 @@ export default function Home() {
             fineY={40}
           />
           <ChromaFlow
-            baseColor="#0066ff"
-            upColor="#0066ff"
-            downColor="#d1d1d1"
+            baseColor="#00a6fb"
+            upColor="#0353a4"
+            downColor="#0353a4"
             leftColor="#1b1028"
             rightColor="#1b1028"
             intensity={0.9}
@@ -213,11 +213,29 @@ export default function Home() {
       </div>
 
       <nav
-        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-6 transition-opacity duration-700 md:px-12 ${
+        className={`se-nav fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-6 transition-opacity duration-700 md:px-12 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="hidden lg:block lg:w-[124px]" aria-hidden="true" />
+        <div className="flex items-center gap-2">
+          <button
+            suppressHydrationWarning
+            type="button"
+            aria-label="Previous website"
+            className="grid h-9 w-9 place-items-center rounded-md border border-transparent bg-transparent font-mono text-sm text-foreground/70 transition hover:border-foreground/30 hover:bg-foreground/10 hover:text-foreground hover:backdrop-blur-md"
+          >
+            &lt;-
+          </button>
+          <img src="/otu-logo.png" alt="Ontario Tech University" className="h-6 w-auto object-contain md:h-8" />
+          <button
+            suppressHydrationWarning
+            type="button"
+            aria-label="Next website"
+            className="grid h-9 w-9 place-items-center rounded-md border border-transparent bg-transparent font-mono text-sm text-foreground/70 transition hover:border-foreground/30 hover:bg-foreground/10 hover:text-foreground hover:backdrop-blur-md"
+          >
+            -&gt;
+          </button>
+        </div>
 
         <div className="hidden items-center gap-5 lg:flex xl:gap-8">
           {["Home", "Experience", "Projects", "About Me", "Contact"].map((item, index) => (
@@ -253,7 +271,7 @@ export default function Home() {
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {/* Hero Section */}
-        <section className="flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pb-16 pt-24 md:px-12 md:pb-24">
+        <section className="se-hero-section flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pb-16 pt-24 md:px-12 md:pb-24">
           <div className="max-w-3xl">
             <div className="mb-4 inline-block animate-in fade-in slide-in-from-bottom-4 rounded-full border border-foreground/20 bg-foreground/15 px-4 py-1.5 backdrop-blur-md duration-700">
               <p className="font-mono text-xs text-foreground/90">Computer Science Co-op Student @ Ontario Tech University</p>
@@ -270,25 +288,19 @@ export default function Home() {
                 Hello! My name is Matthew Serrano. I am a computer science student at Ontario Tech University focused on innovation, technology and design.
               </span>
             </p>
-            <div className="flex animate-in fade-in slide-in-from-bottom-4 flex-col gap-4 duration-1000 delay-300 sm:flex-row sm:items-center">
-              <MagneticButton
-                size="lg"
-                variant="primary"
-                onClick={() => window.open("https://v0.app/templates/R3n0gnvYFbO", "_blank")}
-              >
-                Download Portfolio
-              </MagneticButton>
-              <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(2)}>
-                Preview Portfolio
-              </MagneticButton>
-            </div>
-          </div>
-
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-in fade-in duration-1000 delay-500">
-            <div className="flex items-center gap-2">
-              <p className="font-mono text-xs text-foreground/80">Scroll to explore</p>
-              <div className="flex h-6 w-12 items-center justify-center rounded-full border border-foreground/20 bg-foreground/15 backdrop-blur-md">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-foreground/80" />
+            <div className="flex animate-in items-center gap-4 fade-in slide-in-from-bottom-4 duration-1000 delay-300">
+              <span className="lg:hidden">
+                <p className="typing-prompt font-mono text-base leading-none text-foreground/85" style={{ "--typing-width": "16ch" } as React.CSSProperties}>
+                  <span className="typing-prompt-text">Swipe to explore</span>
+                </p>
+              </span>
+              <span className="hidden lg:inline-flex">
+                <p className="typing-prompt font-mono text-lg leading-none text-foreground/85" style={{ "--typing-width": "17ch" } as React.CSSProperties}>
+                  <span className="typing-prompt-text">Scroll to explore</span>
+                </p>
+              </span>
+              <div className="flex h-9 w-16 items-center justify-center rounded-full border border-foreground/20 bg-foreground/15 font-mono text-base text-foreground/85 backdrop-blur-md md:h-10 md:w-20 md:text-lg">
+                -&gt;
               </div>
             </div>
           </div>
@@ -303,6 +315,53 @@ export default function Home() {
       <style jsx global>{`
         div::-webkit-scrollbar {
           display: none;
+        }
+
+        .typing-prompt {
+          display: flex;
+          height: 2.5rem;
+          align-items: center;
+          width: var(--typing-width, 17ch);
+          max-width: var(--typing-width, 17ch);
+          line-height: 1;
+          white-space: nowrap;
+        }
+
+        .typing-prompt-text {
+          display: inline-block;
+          transform: translateY(1px);
+          width: 0;
+          overflow: hidden;
+          white-space: nowrap;
+          border-right: 1px solid currentColor;
+          animation:
+            typing-prompt 20s steps(17, end) 0.4s infinite,
+            typing-caret 0.8s step-end infinite;
+        }
+
+        @keyframes typing-prompt {
+          0%,
+          10% {
+            width: 0;
+          }
+          22%,
+          92% {
+            width: var(--typing-width, 17ch);
+          }
+          92.01%,
+          100% {
+            width: 0;
+          }
+        }
+
+        @keyframes typing-caret {
+          0%,
+          100% {
+            border-color: transparent;
+          }
+          50% {
+            border-color: currentColor;
+          }
         }
       `}</style>
     </main>

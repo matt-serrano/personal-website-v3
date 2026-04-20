@@ -9,7 +9,7 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
   return (
     <section
       ref={ref}
-      className="flex h-screen w-screen shrink-0 snap-start items-center px-4 pt-20 md:px-12 md:pt-0 lg:px-16"
+      className="se-about-section flex h-screen w-screen shrink-0 snap-start items-center px-4 pt-20 md:px-12 md:pt-0 lg:px-16"
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid gap-8 md:grid-cols-2 md:gap-16 lg:gap-24">
@@ -20,7 +20,7 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
                 isVisible ? "translate-y-0 opacity-100" : "-translate-y-12 opacity-0"
               }`}
             >
-              <h2 className="mb-3 font-sans text-3xl font-light leading-[1.1] tracking-tight text-foreground md:mb-4 md:text-6xl lg:text-7xl">
+              <h2 className="mb-3 font-sans text-4xl font-light leading-[1.05] tracking-tight text-foreground md:mb-4 md:text-7xl lg:text-8xl">
                 Who am I?
                 <br />
                 {/* <span className="text-foreground/40">digital</span> */}
@@ -45,9 +45,9 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
           {/* Right side - Stats with creative layout */}
           <div className="flex flex-col justify-center space-y-6 md:space-y-12">
             {[
-              { value: "150+", label: "Projects", sublabel: "Delivered worldwide", direction: "right" },
-              { value: "8", label: "Years", sublabel: "Of innovation", direction: "left" },
-              { value: "12", label: "Awards", sublabel: "Industry recognition", direction: "right" },
+              { value: "3.80", label: "GPA", sublabel: "Top Academic Performance", direction: "right" },
+              { value: "5+", label: "Projects", sublabel: "Full Stack & AI Applications", direction: "left" },
+              { value: "5x", label: "National Champion", sublabel: "Brazilian Jiu Jitsu", direction: "right" },
             ].map((stat, i) => {
               const getRevealClass = () => {
                 if (!isVisible) {
@@ -83,11 +83,13 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
           }`}
           style={{ transitionDelay: "750ms" }}
         >
-          <MagneticButton size="lg" variant="primary" onClick={() => scrollToSection?.(4)}>
-            Start a Project
-          </MagneticButton>
-          <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection?.(1)}>
-            View Our Work
+          <MagneticButton
+            size="lg"
+            variant="primary"
+            className="w-full justify-center sm:w-[22rem]"
+            onClick={() => window.open("https://youtube.com/shorts/nnF5m4u36G4?si=MhoPekkasLHiqwXN", "_blank", "noreferrer")}
+          >
+            Check out my BJJ Highlights
           </MagneticButton>
         </div>
       </div>

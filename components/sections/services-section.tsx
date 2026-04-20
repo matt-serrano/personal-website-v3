@@ -8,7 +8,7 @@ export function ServicesSection() {
   return (
     <section
       ref={ref}
-      className="flex h-screen w-screen shrink-0 snap-start items-center px-6 pt-20 md:px-12 md:pt-0 lg:px-16"
+      className="se-projects-section flex h-screen w-screen shrink-0 snap-start items-center px-6 pt-20 md:px-12 md:pt-0 lg:px-16"
     >
       <div className="mx-auto w-full max-w-7xl">
         <div
@@ -28,21 +28,26 @@ export function ServicesSection() {
                 title: "AI-Powered Finance Application",
                 description: "Analyzing financial data with AI to deliver insights and forecasts. (HackHive 2026)",
                 direction: "top",
+                href: "https://youtu.be/3ftBPUnSn78",
               },
               {
                 title: "Car Catalog Application",
                 description: "Designing a full-stack platform for browsing and managing car listings.",
                 direction: "right",
+                href: "https://www.youtube.com/watch?v=AR-lZ5WeqPE",
               },
               {
                 title: "Baseball Pitch Sign Detector",
                 description: "Using computer vision to detect and interpret pitch signals in real time.",
                 direction: "left",
+                href: "https://www.linkedin.com/posts/matthew-serrano-13a11b312_computervision-machinelearning-python-activity-7385698204345876480-yUkw?utm_source=share&utm_medium=member_desktop&rcm=ACoAAAMCKH0B3YNGn-PtbICXRmstpv3is2iMdUw",
               },
               {
-                title: "Purchs V2 Marketplace Redesign",
-                description: "Redesigning a marketplace with improved UX and scalable architecture.",
+                title: "Hangman.io",
+                description: "A real-time multiplayer Hangman game with dynamic scoring and interactive gameplay",
                 direction: "bottom",
+                href: "https://www.youtube.com/watch?v=xrJr8vSu1XE",
+                hoverText: "Check out Hangman.io",
               },
                         ].map((service, i) => (
             <ServiceCard key={i} service={service} index={i} isVisible={isVisible} />
@@ -58,7 +63,7 @@ function ServiceCard({
   index,
   isVisible,
 }: {
-  service: { title: string; description: string; direction: string }
+  service: { title: string; description: string; direction: string; href?: string; hoverText?: string }
   index: number
   isVisible: boolean
 }) {
@@ -80,6 +85,9 @@ function ServiceCard({
     return "translate-x-0 translate-y-0 opacity-100"
   }
 
+  const projectNumber = String(index + 1).padStart(2, "0")
+  const hoverText = service.hoverText ?? `Check out my ${service.title}`
+
   return (
     <div
       className={`group transition-all duration-700 ${getRevealClass()}`}
@@ -87,9 +95,25 @@ function ServiceCard({
         transitionDelay: `${index * 150}ms`,
       }}
     >
-      <div className="mb-3 flex items-center gap-3">
-        <div className="h-px w-8 bg-foreground/30 transition-all duration-300 group-hover:w-12 group-hover:bg-foreground/50" />
-        <span className="font-mono text-xs text-foreground/60">0{index + 1}</span>
+      <div className="mb-3 flex min-h-5 items-center gap-3">
+        <div className="project-hover-line h-px w-8 bg-foreground/30 transition-all duration-300 group-hover:w-16 group-hover:bg-foreground/60" />
+        <span className="font-mono text-xs text-foreground/60">{projectNumber}</span>
+        {service.href ? (
+          <a
+            href={service.href}
+            target="_blank"
+            rel="noreferrer"
+            className="project-hover-link translate-x-1 font-mono text-xs text-foreground/0 underline underline-offset-4 transition-all duration-300 group-hover:translate-x-0 group-hover:text-foreground/70"
+          >
+            <span className="touch:hidden">{hoverText}</span>
+            <span className="hidden touch:inline">Check it out</span>
+          </a>
+        ) : (
+          <span className="project-hover-link translate-x-1 font-mono text-xs text-foreground/0 transition-all duration-300 group-hover:translate-x-0 group-hover:text-foreground/70">
+            <span className="underline underline-offset-4 touch:hidden">{hoverText}</span>
+            <span className="hidden underline underline-offset-4 touch:inline">Check it out</span>
+          </span>
+        )}
       </div>
       <h3 className="mb-2 font-sans text-2xl font-light text-foreground md:text-3xl">{service.title}</h3>
       <p className="max-w-sm text-sm leading-relaxed text-foreground/80 md:text-base">{service.description}</p>

@@ -9,7 +9,7 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Shaders Landing Page",
+  title: "Matthew Serrano",
   description: "Created with v0",
   generator: "v0.app",
 }
@@ -33,9 +33,11 @@ const devRuntimeGuardScript = `
     if (reason == null) return "";
     if (reason instanceof Error) return reason.message || reason.name || "";
     if (typeof reason === "string") return reason;
+    if (reason instanceof Event) return reason.type || "[object Event]";
 
     try {
-      return JSON.stringify(reason);
+      const serialized = JSON.stringify(reason);
+      return serialized === "{}" ? Object.prototype.toString.call(reason) : serialized;
     } catch {
       return String(reason);
     }
@@ -43,7 +45,11 @@ const devRuntimeGuardScript = `
 
   window.addEventListener("unhandledrejection", (event) => {
     const message = getMessage(event.reason);
-    const isBenign = message === "" || benignRuntimePatterns.some((pattern) => pattern.test(message));
+    const isBrowserEvent = event.reason instanceof Event || message === "[object Event]";
+    const isBenign =
+      message === "" ||
+      isBrowserEvent ||
+      benignRuntimePatterns.some((pattern) => pattern.test(message));
 
     if (!isBenign) return;
 
