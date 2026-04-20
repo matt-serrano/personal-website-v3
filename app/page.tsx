@@ -185,7 +185,7 @@ export default function Home() {
         <Shader className="h-full w-full">
           <Swirl
             colorA="#1275d8"
-            colorB="#e19136"
+            colorB="#1b1028"
             speed={0.8}
             detail={0.8}
             blend={50}
@@ -200,8 +200,8 @@ export default function Home() {
             baseColor="#0066ff"
             upColor="#0066ff"
             downColor="#d1d1d1"
-            leftColor="#e19136"
-            rightColor="#e19136"
+            leftColor="#1b1028"
+            rightColor="#1b1028"
             intensity={0.9}
             radius={1.8}
             momentum={25}
@@ -217,22 +217,15 @@ export default function Home() {
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
       >
-        <button
-          onClick={() => scrollToSection(0)}
-          className="flex items-center gap-2 transition-transform hover:scale-105"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground/15 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-foreground/25">
-            <span className="font-sans text-xl font-bold text-foreground">A</span>
-          </div>
-          <span className="font-sans text-xl font-semibold tracking-tight text-foreground">Acme</span>
-        </button>
+        <div className="hidden lg:block lg:w-[124px]" aria-hidden="true" />
 
-        <div className="hidden items-center gap-8 md:flex">
-          {["Home", "Work", "Services", "About", "Contact"].map((item, index) => (
+        <div className="hidden items-center gap-5 lg:flex xl:gap-8">
+          {["Home", "Experience", "Projects", "Extracurriculars", "Contact"].map((item, index) => (
             <button
+              suppressHydrationWarning
               key={item}
               onClick={() => scrollToSection(index)}
-              className={`group relative font-sans text-sm font-medium transition-colors ${
+              className={`group relative whitespace-nowrap font-sans text-sm font-medium transition-colors ${
                 currentSection === index ? "text-foreground" : "text-foreground/80 hover:text-foreground"
               }`}
             >
@@ -247,7 +240,7 @@ export default function Home() {
         </div>
 
         <MagneticButton variant="secondary" onClick={() => scrollToSection(4)}>
-          Get Started
+          Connect With Me!
         </MagneticButton>
       </nav>
 
@@ -263,19 +256,18 @@ export default function Home() {
         <section className="flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pb-16 pt-24 md:px-12 md:pb-24">
           <div className="max-w-3xl">
             <div className="mb-4 inline-block animate-in fade-in slide-in-from-bottom-4 rounded-full border border-foreground/20 bg-foreground/15 px-4 py-1.5 backdrop-blur-md duration-700">
-              <p className="font-mono text-xs text-foreground/90">WebGL Powered Design</p>
+              <p className="font-mono text-xs text-foreground/90">Computer Science Co-op Student @ Ontario Tech University</p>
             </div>
             <h1 className="mb-6 animate-in fade-in slide-in-from-bottom-8 font-sans text-6xl font-light leading-[1.1] tracking-tight text-foreground duration-1000 md:text-7xl lg:text-8xl">
               <span className="text-balance">
-                Creative experiences
-                <br />
-                in fluid motion
+                Matthew 
+                <br/>
+                Serrano
               </span>
             </h1>
             <p className="mb-8 max-w-xl animate-in fade-in slide-in-from-bottom-4 text-lg leading-relaxed text-foreground/90 duration-1000 delay-200 md:text-xl">
               <span className="text-pretty">
-                Transforming digital spaces with dynamic shader effects and real-time visual experiences that captivate
-                and inspire.
+                Hello! My name is Matthew Serrano. I am a computer science student at Ontario Tech University focused on innovation, technology and design.
               </span>
             </p>
             <div className="flex animate-in fade-in slide-in-from-bottom-4 flex-col gap-4 duration-1000 delay-300 sm:flex-row sm:items-center">
@@ -284,10 +276,10 @@ export default function Home() {
                 variant="primary"
                 onClick={() => window.open("https://v0.app/templates/R3n0gnvYFbO", "_blank")}
               >
-                Open in v0
+                Download Portfolio
               </MagneticButton>
               <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(2)}>
-                View Demo
+                Preview Portfolio
               </MagneticButton>
             </div>
           </div>
