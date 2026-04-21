@@ -10,6 +10,10 @@ import { ContactSection } from "@/components/sections/contact-section"
 import { MagneticButton } from "@/components/magnetic-button"
 import { useRef, useEffect, useState } from "react"
 
+const TOTAL_SECTIONS = 5
+const PAGED_VIEWPORT_QUERY = "(min-width: 768px)"
+const PAGED_SCROLL_LOCK_MS = 650
+
 export default function Home() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [currentSection, setCurrentSection] = useState(0)
@@ -19,6 +23,14 @@ export default function Home() {
   const touchStartX = useRef(0)
   const shaderContainerRef = useRef<HTMLDivElement>(null)
   const scrollThrottleRef = useRef<number | null>(null)
+  const currentSectionRef = useRef(0)
+  const isPagedViewportRef = useRef(false)
+  const isTransitioningRef = useRef(false)
+  const transitionTimeoutRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    currentSectionRef.current = currentSection
+  }, [currentSection])
 
   useEffect(() => {
     let hostname = window.location.hostname
@@ -60,40 +72,85 @@ export default function Home() {
     }
   }, [])
 
-  const scrollToSection = (index: number) => {
-    if (scrollContainerRef.current) {
-      const sectionWidth = scrollContainerRef.current.offsetWidth
-      scrollContainerRef.current.scrollTo({
-        left: sectionWidth * index,
-        behavior: "smooth",
-      })
-      setCurrentSection(index)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(PAGED_VIEWPORT_QUERY)
+
+    const updateViewportMode = () => {
+      isPagedViewportRef.current = mediaQuery.matches
     }
+
+    updateViewportMode()
+    mediaQuery.addEventListener("change", updateViewportMode)
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateViewportMode)
+    }
+  }, [])
+
+  const clearTransitionLock = () => {
+    if (transitionTimeoutRef.current) {
+      window.clearTimeout(transitionTimeoutRef.current)
+      transitionTimeoutRef.current = null
+    }
+    isTransitioningRef.current = false
+  }
+
+  const lockSectionPaging = () => {
+    clearTransitionLock()
+    isTransitioningRef.current = true
+    transitionTimeoutRef.current = window.setTimeout(() => {
+      isTransitioningRef.current = false
+      transitionTimeoutRef.current = null
+    }, PAGED_SCROLL_LOCK_MS)
+  }
+
+  const scrollToSection = (index: number, behavior: ScrollBehavior = "smooth") => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const clampedIndex = Math.max(0, Math.min(index, TOTAL_SECTIONS - 1))
+    const sectionWidth = container.offsetWidth
+
+    if (isPagedViewportRef.current && behavior === "smooth" && !isTransitioningRef.current) {
+      lockSectionPaging()
+    }
+
+    container.scrollTo({
+      left: sectionWidth * clampedIndex,
+      behavior,
+    })
+    setCurrentSection(clampedIndex)
+    currentSectionRef.current = clampedIndex
   }
 
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
+      if (!isPagedViewportRef.current) return
       touchStartY.current = e.touches[0].clientY
       touchStartX.current = e.touches[0].clientX
     }
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (!isPagedViewportRef.current || isTransitioningRef.current) return
       if (Math.abs(e.touches[0].clientY - touchStartY.current) > 10) {
         e.preventDefault()
       }
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
+      if (!isPagedViewportRef.current || isTransitioningRef.current) return
+
       const touchEndY = e.changedTouches[0].clientY
       const touchEndX = e.changedTouches[0].clientX
       const deltaY = touchStartY.current - touchEndY
       const deltaX = touchStartX.current - touchEndX
 
       if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
-        if (deltaY > 0 && currentSection < 4) {
-          scrollToSection(currentSection + 1)
-        } else if (deltaY < 0 && currentSection > 0) {
-          scrollToSection(currentSection - 1)
+        const nextSection = deltaY > 0 ? currentSectionRef.current + 1 : currentSectionRef.current - 1
+
+        if (nextSection >= 0 && nextSection < TOTAL_SECTIONS) {
+          lockSectionPaging()
+          scrollToSection(nextSection)
         }
       }
     }
@@ -112,26 +169,26 @@ export default function Home() {
         container.removeEventListener("touchend", handleTouchEnd)
       }
     }
-  }, [currentSection])
+  }, [])
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        e.preventDefault()
+      if (!isPagedViewportRef.current) return
 
-        if (!scrollContainerRef.current) return
+      const dominantDelta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX
+      if (Math.abs(dominantDelta) < 12) return
 
-        scrollContainerRef.current.scrollBy({
-          left: e.deltaY,
-          behavior: "instant",
-        })
+      e.preventDefault()
 
-        const sectionWidth = scrollContainerRef.current.offsetWidth
-        const newSection = Math.round(scrollContainerRef.current.scrollLeft / sectionWidth)
-        if (newSection !== currentSection) {
-          setCurrentSection(newSection)
-        }
-      }
+      if (isTransitioningRef.current) return
+
+      const direction = dominantDelta > 0 ? 1 : -1
+      const nextSection = currentSectionRef.current + direction
+
+      if (nextSection < 0 || nextSection >= TOTAL_SECTIONS) return
+
+      lockSectionPaging()
+      scrollToSection(nextSection)
     }
 
     const container = scrollContainerRef.current
@@ -144,7 +201,7 @@ export default function Home() {
         container.removeEventListener("wheel", handleWheel)
       }
     }
-  }, [currentSection])
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -160,8 +217,16 @@ export default function Home() {
         const scrollLeft = scrollContainerRef.current.scrollLeft
         const newSection = Math.round(scrollLeft / sectionWidth)
 
-        if (newSection !== currentSection && newSection >= 0 && newSection <= 4) {
+        if (newSection !== currentSectionRef.current && newSection >= 0 && newSection < TOTAL_SECTIONS) {
           setCurrentSection(newSection)
+          currentSectionRef.current = newSection
+        }
+
+        if (isPagedViewportRef.current) {
+          const targetLeft = sectionWidth * newSection
+          if (Math.abs(scrollLeft - targetLeft) > 2 && !isTransitioningRef.current) {
+            scrollToSection(newSection, "auto")
+          }
         }
 
         scrollThrottleRef.current = null
@@ -181,7 +246,20 @@ export default function Home() {
         cancelAnimationFrame(scrollThrottleRef.current)
       }
     }
-  }, [currentSection])
+  }, [])
+
+  useEffect(() => {
+    const handleResize = () => {
+      scrollToSection(currentSectionRef.current, "auto")
+    }
+
+    window.addEventListener("resize", handleResize)
+
+    return () => {
+      window.removeEventListener("resize", handleResize)
+      clearTransitionLock()
+    }
+  }, [])
 
   const webringPrevHref = `https://otu-ring.com/prev.html?from=${encodeURIComponent(webringHostname)}`
   const webringNextHref = `https://otu-ring.com/next.html?from=${encodeURIComponent(webringHostname)}`
@@ -296,7 +374,7 @@ export default function Home() {
       <div
         ref={scrollContainerRef}
         data-scroll-container
-        className={`relative z-10 flex h-screen overflow-x-auto overflow-y-hidden transition-opacity duration-700 ${
+        className={`relative z-10 flex h-screen overflow-x-hidden overflow-y-hidden transition-opacity duration-700 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -321,13 +399,13 @@ export default function Home() {
             </p>
             <div className="flex animate-in items-center gap-4 fade-in slide-in-from-bottom-4 duration-1000 delay-300">
               <span className="lg:hidden">
-                <p className="typing-prompt font-mono text-base leading-none text-foreground/85" style={{ "--typing-width": "16ch" } as React.CSSProperties}>
-                  <span className="typing-prompt-text">Swipe to explore</span>
+                <p className="typing-prompt font-mono text-base leading-none text-foreground/85" style={{ "--typing-width": "27ch" } as React.CSSProperties}>
+                  <span className="typing-prompt-text">Swipe left/right to explore</span>
                 </p>
               </span>
               <span className="hidden lg:inline-flex">
-                <p className="typing-prompt font-mono text-lg leading-none text-foreground/85" style={{ "--typing-width": "17ch" } as React.CSSProperties}>
-                  <span className="typing-prompt-text">Scroll to explore</span>
+                <p className="typing-prompt font-mono text-lg leading-none text-foreground/85" style={{ "--typing-width": "25ch" } as React.CSSProperties}>
+                  <span className="typing-prompt-text">Scroll up/down to explore</span>
                 </p>
               </span>
               <div className="flex h-9 w-16 items-center justify-center rounded-full border border-foreground/20 bg-foreground/15 font-mono text-base text-foreground/85 backdrop-blur-md md:h-10 md:w-20 md:text-lg">
