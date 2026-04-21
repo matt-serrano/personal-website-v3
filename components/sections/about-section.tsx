@@ -45,9 +45,9 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
           {/* Right side - Stats with creative layout */}
           <div className="flex flex-col justify-center space-y-6 md:space-y-12">
             {[
-              { value: "3.80", label: "GPA", sublabel: "Top Academic Performance", direction: "right" },
-              { value: "5+", label: "Projects", sublabel: "Full Stack & AI Applications", direction: "left" },
-              { value: "5x", label: "National Champion", sublabel: "Brazilian Jiu Jitsu", direction: "right" },
+              { value: "3.80", label: "GPA", sublabel: "2x President's List", direction: "right" },
+              { value: "10+", label: "Languages and Frameworks", sublabel: "Building full-stack and AI solutions", direction: "left" },
+              { value: "15+", label: "Years Experience", sublabel: "Brazilian Jiu Jitsu and Judo", direction: "right" },
             ].map((stat, i) => {
               const getRevealClass = () => {
                 if (!isVisible) {
