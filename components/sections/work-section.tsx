@@ -28,7 +28,7 @@ export function WorkSection() {
               number: "01",
               title: "IT Systems Analyst | Developer",
               category: "Ontario Public Service | Government of Ontario",
-              year: "May 2026 - Present",
+              year: "Incoming May 2026",
               direction: "left",
             },
             {
