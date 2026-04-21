@@ -70,7 +70,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
         {process.env.NODE_ENV === "development" ? (
           <Script id="dev-runtime-guard" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: devRuntimeGuardScript }} />

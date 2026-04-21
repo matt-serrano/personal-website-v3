@@ -9,9 +9,9 @@ export function ServicesSection() {
   return (
     <section
       ref={ref}
-      className="se-projects-section flex h-screen w-screen shrink-0 snap-start items-center px-6 pt-20 md:px-12 md:pt-0 lg:px-16"
+      className="se-projects-section flex h-screen w-screen shrink-0 snap-start items-start px-4 pt-24 md:items-center md:px-12 md:pt-0 lg:px-16"
     >
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="mx-auto w-full max-w-7xl pt-2 md:pt-0">
         <div
           className={`mb-12 transition-all duration-700 md:mb-16 ${
             isVisible ? "translate-y-0 opacity-100" : "-translate-y-12 opacity-0"
@@ -23,7 +23,7 @@ export function ServicesSection() {
           <p className="font-mono text-sm text-foreground/60 md:text-base">Some things I created</p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 md:gap-x-16 md:gap-y-12 lg:gap-x-24">
+        <div className="grid gap-6 md:grid-cols-2 md:gap-x-16 md:gap-y-12 lg:gap-x-24">
           {[
             {
                 title: "AI-Powered Finance Application",
@@ -96,7 +96,7 @@ function ServiceCard({
         transitionDelay: `${index * 150}ms`,
       }}
     >
-      <div className="mb-3 flex min-h-5 items-center gap-3">
+      <div className="mb-2.5 flex min-h-5 items-center gap-2.5 md:mb-3 md:gap-3">
         <div className="project-hover-line h-px w-8 bg-foreground/30 transition-all duration-300 group-hover:w-16 group-hover:bg-foreground/60" />
         <span className="font-mono text-xs text-foreground/60">{projectNumber}</span>
         {service.href ? (
@@ -121,8 +121,12 @@ function ServiceCard({
           </span>
         )}
       </div>
-      <h3 className="mb-2 font-sans text-2xl font-light text-foreground md:text-3xl">{service.title}</h3>
-      <p className="max-w-sm text-sm leading-relaxed text-foreground/80 md:text-base">{service.description}</p>
+      <h3 className="mb-1.5 text-balance font-sans text-xl font-light leading-tight text-foreground sm:text-2xl md:mb-2 md:text-3xl">
+        {service.title}
+      </h3>
+      <p className="max-w-[20rem] text-pretty text-[0.84rem] leading-relaxed text-foreground/80 sm:max-w-sm sm:text-sm md:text-base">
+        {service.description}
+      </p>
     </div>
   )
 }
