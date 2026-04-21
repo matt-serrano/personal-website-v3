@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export function CustomCursor() {
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
   const outerRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
   const positionRef = useRef({ x: 0, y: 0 })
@@ -10,6 +11,25 @@ export function CustomCursor() {
   const isPointerRef = useRef(false)
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(hover: none), (pointer: coarse)")
+
+    const updateIsTouchDevice = () => {
+      setIsTouchDevice(mediaQuery.matches)
+    }
+
+    updateIsTouchDevice()
+    mediaQuery.addEventListener("change", updateIsTouchDevice)
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateIsTouchDevice)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isTouchDevice) {
+      return
+    }
+
     let animationFrameId: number
 
     const lerp = (start: number, end: number, factor: number) => {
@@ -46,7 +66,11 @@ export function CustomCursor() {
       window.removeEventListener("mousemove", handleMouseMove)
       cancelAnimationFrame(animationFrameId)
     }
-  }, [])
+  }, [isTouchDevice])
+
+  if (isTouchDevice) {
+    return null
+  }
 
   return (
     <>
