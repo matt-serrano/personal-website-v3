@@ -1,7 +1,6 @@
 "use client"
 
 import { Shader, ChromaFlow, Swirl } from "shaders/react"
-import { CustomCursor } from "@/components/custom-cursor"
 import { GrainOverlay } from "@/components/grain-overlay"
 import { WorkSection } from "@/components/sections/work-section"
 import { ServicesSection } from "@/components/sections/services-section"
@@ -12,12 +11,16 @@ import { useRef, useEffect, useState } from "react"
 
 const TOTAL_SECTIONS = 5
 const PAGED_VIEWPORT_QUERY = "(min-width: 768px)"
+const TOUCH_DEVICE_QUERY = "(hover: none), (pointer: coarse)"
 const PAGED_SCROLL_LOCK_MS = 650
+const TOUCH_AXIS_LOCK_THRESHOLD = 12
+const TOUCH_SWIPE_THRESHOLD = 50
 
 export default function Home() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [currentSection, setCurrentSection] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [webringHostname, setWebringHostname] = useState("otu-ring.com")
   const touchStartY = useRef(0)
   const touchStartX = useRef(0)
@@ -25,8 +28,10 @@ export default function Home() {
   const scrollThrottleRef = useRef<number | null>(null)
   const currentSectionRef = useRef(0)
   const isPagedViewportRef = useRef(false)
+  const isTouchDeviceRef = useRef(false)
   const isTransitioningRef = useRef(false)
   const transitionTimeoutRef = useRef<number | null>(null)
+  const touchAxisRef = useRef<"x" | "y" | null>(null)
 
   useEffect(() => {
     currentSectionRef.current = currentSection
@@ -87,6 +92,22 @@ export default function Home() {
     }
   }, [])
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(TOUCH_DEVICE_QUERY)
+
+    const updateTouchDeviceMode = () => {
+      setIsTouchDevice(mediaQuery.matches)
+      isTouchDeviceRef.current = mediaQuery.matches
+    }
+
+    updateTouchDeviceMode()
+    mediaQuery.addEventListener("change", updateTouchDeviceMode)
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateTouchDeviceMode)
+    }
+  }, [])
+
   const clearTransitionLock = () => {
     if (transitionTimeoutRef.current) {
       window.clearTimeout(transitionTimeoutRef.current)
@@ -125,30 +146,41 @@ export default function Home() {
 
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
+      if (!isTouchDeviceRef.current) return
+
       touchStartY.current = e.touches[0].clientY
       touchStartX.current = e.touches[0].clientX
+      touchAxisRef.current = null
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (isTransitioningRef.current) return
+      if (!isTouchDeviceRef.current || isTransitioningRef.current) return
 
       const deltaY = Math.abs(e.touches[0].clientY - touchStartY.current)
       const deltaX = Math.abs(e.touches[0].clientX - touchStartX.current)
 
-      if (deltaX > deltaY && deltaX > 10) {
+      if (!touchAxisRef.current && (deltaX > TOUCH_AXIS_LOCK_THRESHOLD || deltaY > TOUCH_AXIS_LOCK_THRESHOLD)) {
+        touchAxisRef.current = deltaX > deltaY ? "x" : "y"
+      }
+
+      if (touchAxisRef.current === "x") {
         e.preventDefault()
       }
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (isTransitioningRef.current) return
+      if (!isTouchDeviceRef.current || isTransitioningRef.current) return
 
       const touchEndY = e.changedTouches[0].clientY
       const touchEndX = e.changedTouches[0].clientX
       const deltaY = touchStartY.current - touchEndY
       const deltaX = touchStartX.current - touchEndX
 
-      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+      const isHorizontalSwipe =
+        touchAxisRef.current === "x" ||
+        (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > TOUCH_SWIPE_THRESHOLD)
+
+      if (isHorizontalSwipe && Math.abs(deltaX) > TOUCH_SWIPE_THRESHOLD) {
         const nextSection = deltaX > 0 ? currentSectionRef.current + 1 : currentSectionRef.current - 1
 
         if (nextSection >= 0 && nextSection < TOTAL_SECTIONS) {
@@ -156,6 +188,12 @@ export default function Home() {
           scrollToSection(nextSection)
         }
       }
+
+      touchAxisRef.current = null
+    }
+
+    const handleTouchCancel = () => {
+      touchAxisRef.current = null
     }
 
     const container = scrollContainerRef.current
@@ -163,6 +201,7 @@ export default function Home() {
       container.addEventListener("touchstart", handleTouchStart, { passive: true })
       container.addEventListener("touchmove", handleTouchMove, { passive: false })
       container.addEventListener("touchend", handleTouchEnd, { passive: true })
+      container.addEventListener("touchcancel", handleTouchCancel, { passive: true })
     }
 
     return () => {
@@ -170,6 +209,7 @@ export default function Home() {
         container.removeEventListener("touchstart", handleTouchStart)
         container.removeEventListener("touchmove", handleTouchMove)
         container.removeEventListener("touchend", handleTouchEnd)
+        container.removeEventListener("touchcancel", handleTouchCancel)
       }
     }
   }, [])
@@ -269,7 +309,6 @@ export default function Home() {
 
   return (
     <main className="relative h-screen w-full overflow-hidden bg-background">
-      <CustomCursor />
       <GrainOverlay />
 
       <div
@@ -377,7 +416,7 @@ export default function Home() {
       <div
         ref={scrollContainerRef}
         data-scroll-container
-        className={`relative z-10 flex h-screen overflow-x-hidden overflow-y-hidden transition-opacity duration-700 ${
+        className={`relative z-10 flex h-screen overflow-x-hidden ${isTouchDevice ? "overflow-y-auto" : "overflow-y-hidden"} transition-opacity duration-700 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none", touchAction: "pan-y pinch-zoom" }}
