@@ -14,10 +14,21 @@ export default function Home() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [currentSection, setCurrentSection] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [webringHostname, setWebringHostname] = useState("otu-ring.com")
   const touchStartY = useRef(0)
   const touchStartX = useRef(0)
   const shaderContainerRef = useRef<HTMLDivElement>(null)
   const scrollThrottleRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    let hostname = window.location.hostname
+
+    if (hostname.startsWith("www.")) {
+      hostname = hostname.substring(4)
+    }
+
+    setWebringHostname(hostname || "otu-ring.com")
+  }, [])
 
   useEffect(() => {
     const checkShaderReady = () => {
@@ -172,6 +183,9 @@ export default function Home() {
     }
   }, [currentSection])
 
+  const webringPrevHref = `https://otu-ring.com/prev.html?from=${encodeURIComponent(webringHostname)}`
+  const webringNextHref = `https://otu-ring.com/next.html?from=${encodeURIComponent(webringHostname)}`
+
   return (
     <main className="relative h-screen w-full overflow-hidden bg-background">
       <CustomCursor />
@@ -217,24 +231,41 @@ export default function Home() {
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="flex items-center gap-2">
-          <button
-            suppressHydrationWarning
-            type="button"
-            aria-label="Previous website"
-            className="grid h-9 w-9 place-items-center rounded-md border border-transparent bg-transparent font-mono text-sm text-foreground/70 transition hover:border-foreground/30 hover:bg-foreground/10 hover:text-foreground hover:backdrop-blur-md"
+        <div
+          id="otu-webring"
+          className="flex items-center justify-center gap-3 md:gap-4"
+        >
+          <a
+            id="webring-prev"
+            href={webringPrevHref}
+            aria-label="Previous site in the OTU webring"
+            title="Previous site"
+            className="grid h-9 w-9 place-items-center rounded-md text-base text-zinc-500 transition-all duration-200 hover:bg-white/10 hover:text-zinc-50"
           >
-            &lt;-
-          </button>
-          <img src="/otu-logo.png" alt="Ontario Tech University" className="h-5 w-auto object-contain md:h-6" />
-          <button
-            suppressHydrationWarning
-            type="button"
-            aria-label="Next website"
-            className="grid h-9 w-9 place-items-center rounded-md border border-transparent bg-transparent font-mono text-sm text-foreground/70 transition hover:border-foreground/30 hover:bg-foreground/10 hover:text-foreground hover:backdrop-blur-md"
+            ←
+          </a>
+          <a
+            href="https://otu-ring.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="OTU Webring"
+            className="flex items-center"
           >
-            -&gt;
-          </button>
+            <img
+              src="https://otu-ring.com/assets/ontariotech.svg"
+              alt="OTU Webring"
+              className="h-5 w-auto opacity-70 transition-opacity duration-200 hover:opacity-100"
+            />
+          </a>
+          <a
+            id="webring-next"
+            href={webringNextHref}
+            aria-label="Next site in the OTU webring"
+            title="Next site"
+            className="grid h-9 w-9 place-items-center rounded-md text-base text-zinc-500 transition-all duration-200 hover:bg-white/10 hover:text-zinc-50"
+          >
+            →
+          </a>
         </div>
 
         <div className="hidden items-center gap-5 lg:flex xl:gap-8">
