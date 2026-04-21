@@ -285,7 +285,7 @@ export default function Home() {
             </h1>
             <p className="mb-8 max-w-xl animate-in fade-in slide-in-from-bottom-4 text-lg leading-relaxed text-foreground/90 duration-1000 delay-200 md:text-xl">
               <span className="text-pretty">
-                Hello! My name is Matthew Serrano. I am a computer science student at Ontario Tech University focused on innovation, technology and design.
+                Hello! My name is Matthew Serrano. I am a Computer Science student at Ontario Tech University focused on innovation, technology and design.
               </span>
             </p>
             <div className="flex animate-in items-center gap-4 fade-in slide-in-from-bottom-4 duration-1000 delay-300">

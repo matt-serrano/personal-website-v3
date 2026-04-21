@@ -37,7 +37,7 @@ export function AboutSection({ scrollToSection }: { scrollToSection?: (index: nu
                 I have experience across multiple programming languages with a focus on software development and building practical, well-designed systems. 
               </p>
               <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                Aside from tech, I am a black belt in judo and purple belt in Brazilian jiu-jitsu, bringing discipline and consistency into every area. 
+                Aside from technology, I am a black belt in judo and purple belt in Brazilian jiu-jitsu, bringing discipline and consistency into every area. 
               </p>
             </div>
           </div>
