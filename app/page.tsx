@@ -125,28 +125,31 @@ export default function Home() {
 
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
-      if (!isPagedViewportRef.current) return
       touchStartY.current = e.touches[0].clientY
       touchStartX.current = e.touches[0].clientX
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isPagedViewportRef.current || isTransitioningRef.current) return
-      if (Math.abs(e.touches[0].clientY - touchStartY.current) > 10) {
+      if (isTransitioningRef.current) return
+
+      const deltaY = Math.abs(e.touches[0].clientY - touchStartY.current)
+      const deltaX = Math.abs(e.touches[0].clientX - touchStartX.current)
+
+      if (deltaX > deltaY && deltaX > 10) {
         e.preventDefault()
       }
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (!isPagedViewportRef.current || isTransitioningRef.current) return
+      if (isTransitioningRef.current) return
 
       const touchEndY = e.changedTouches[0].clientY
       const touchEndX = e.changedTouches[0].clientX
       const deltaY = touchStartY.current - touchEndY
       const deltaX = touchStartX.current - touchEndX
 
-      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
-        const nextSection = deltaY > 0 ? currentSectionRef.current + 1 : currentSectionRef.current - 1
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+        const nextSection = deltaX > 0 ? currentSectionRef.current + 1 : currentSectionRef.current - 1
 
         if (nextSection >= 0 && nextSection < TOTAL_SECTIONS) {
           lockSectionPaging()
@@ -377,7 +380,7 @@ export default function Home() {
         className={`relative z-10 flex h-screen overflow-x-hidden overflow-y-hidden transition-opacity duration-700 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none", touchAction: "pan-y pinch-zoom" }}
       >
         {/* Hero Section */}
         <section className="se-hero-section flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pb-16 pt-24 md:px-12 md:pb-24">
