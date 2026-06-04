@@ -22,7 +22,7 @@ export function WorkSection() {
           <p className="font-mono text-sm text-foreground/60 md:text-base">My Work Experience</p>
         </div>
 
-        <div className="space-y-6 md:space-y-8">
+        <div className="space-y-10 md:space-y-14 lg:space-y-16">
           {[
             {
               number: "01",
@@ -37,13 +37,6 @@ export function WorkSection() {
               category: "Purchs | AI Wholesale Platform for CPG Brands & Retailers",
               year: "November 2025 - March 2026",
               direction: "right",
-            },
-            {
-              number: "03",
-              title: "Barista",
-              category: "Chatime",
-              year: "June 2024 - April 2026",
-              direction: "left",
             },
           ].map((project, i) => (
             <ProjectCard key={i} project={project} index={i} isVisible={isVisible} />
@@ -72,7 +65,7 @@ function ProjectCard({
 
   return (
     <div
-      className={`group flex max-w-full flex-col items-start gap-3 border-b border-foreground/10 py-5 transition-all duration-700 hover:border-foreground/20 md:flex-row md:items-center md:justify-between md:gap-6 md:py-8 ${
+      className={`group flex max-w-full flex-col items-start gap-3 border-b border-foreground/10 py-7 transition-all duration-700 hover:border-foreground/20 md:flex-row md:items-center md:justify-between md:gap-6 md:py-12 lg:py-14 ${
         index % 2 === 0 ? "md:max-w-[85%]" : "md:ml-auto md:max-w-[90%]"
       } ${getRevealClass()}`}
       style={{
