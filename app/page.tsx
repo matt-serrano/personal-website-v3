@@ -459,7 +459,7 @@ export default function Home() {
 
         <WorkSection />
         <ServicesSection />
-        <AboutSection scrollToSection={scrollToSection} />
+        <AboutSection />
         <ContactSection />
       </div>
 

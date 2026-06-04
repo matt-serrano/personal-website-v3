@@ -3,7 +3,7 @@
 import { MagneticButton } from "@/components/magnetic-button"
 import { useReveal } from "@/hooks/use-reveal"
 
-export function AboutSection({ scrollToSection }: { scrollToSection?: (index: number) => void }) {
+export function AboutSection() {
   const { ref, isVisible } = useReveal(0.3)
 
   return (
