@@ -26,7 +26,10 @@ export function LivingScene({ onStatus }: Props) {
   const birdsRef = useRef<HTMLCanvasElement>(null)
   const consoleRef = useRef<HTMLDivElement>(null)
   const onStatusRef = useRef(onStatus)
-  onStatusRef.current = onStatus
+
+  useEffect(() => {
+    onStatusRef.current = onStatus
+  }, [onStatus])
 
   useEffect(() => {
     const poster = posterRef.current!

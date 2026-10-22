@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Contact · Matthew Serrano" }
 export default function ContactPage() {
   return (
     <QuietPage current="/contact">
-      <div className="grid gap-12 pt-[clamp(40px,8vh,96px)] md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:gap-20">
+      <div className="grid grid-cols-1 gap-12 pt-[clamp(40px,8vh,96px)] md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:gap-20">
         <div>
           <h1 className="display text-[clamp(56px,8vw,120px)] leading-[0.9]">{contact.heading}</h1>
           <p className="mt-4 text-[13px] font-semibold uppercase tracking-[0.14em] text-white/80">{contact.sub}</p>

@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "About · Matthew Serrano" }
 export default function AboutPage() {
   return (
     <QuietPage current="/about">
-      <div className="grid gap-12 pt-[clamp(40px,8vh,96px)] md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:gap-20">
+      <div className="grid grid-cols-1 gap-12 pt-[clamp(40px,8vh,96px)] md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:gap-20">
         <div>
           <h1 className="display text-[clamp(56px,8vw,120px)] leading-[0.9]">{about.heading}</h1>
           <div className="mt-8 max-w-[52ch] space-y-4 text-[17px] font-medium leading-relaxed">
@@ -30,7 +30,7 @@ export default function AboutPage() {
 
         <dl className="self-center">
           {about.stats.map((s) => (
-            <div key={s.label} className="grid grid-cols-[minmax(0,7.5rem)_1fr] items-baseline gap-6 border-t border-white/40 py-5 first:border-t-0 md:first:border-t">
+            <div key={s.label} className="grid grid-cols-[minmax(0,7.5rem)_1fr] items-center gap-6 border-t border-white/40 py-5 first:border-t-0 md:first:border-t">
               <dt className="sr-only">{s.label}</dt>
               <dd className="display text-[clamp(40px,5vw,64px)] leading-none">{s.value}</dd>
               <dd>
