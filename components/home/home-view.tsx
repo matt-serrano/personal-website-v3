@@ -5,6 +5,8 @@ import { LivingScene, type SceneStatus } from "@/components/living-scene"
 import { Hero } from "@/components/home/hero"
 import { LocationLabel } from "@/components/home/location-label"
 import { Panel } from "@/components/home/panel"
+import { SiteLinks } from "@/components/site-links"
+import { Webring } from "@/components/webring"
 
 /**
  * One full-screen view: the living scene behind, everything else laid straight on it.
@@ -25,6 +27,10 @@ export function HomeView() {
         </div>
         <div className="home-place">
           <LocationLabel status={status} />
+        </div>
+        <div className="home-ring flex flex-wrap items-center gap-x-6">
+          <SiteLinks />
+          <Webring />
         </div>
       </main>
     </>
