@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El Nido Living Scene</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&display=swap">
+<style>
+body { margin: 0; }
+[hidden] { display: none !important; }
+/* Layout: one full-bleed living photograph; a small time console floats bottom-right. Single dark look by choice. */
+:root {
+  --ink: #F4F6F5;
+  --ink-dim: rgba(244,246,245,0.72);
+  --glass: rgba(6,14,20,0.42);
+  --line: rgba(244,246,245,0.28);
+  --lagoon: #6FE3D2;
+  --ground: #071017;
+  --ui: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--ground); color: var(--ink); font-family: var(--ui); overflow: hidden; }
+#poster, #gl, #birds { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+#poster { background: var(--ground) center / cover no-repeat; }
+#gl { opacity: 0; transition: opacity .8s ease; }
+#gl.ready { opacity: 1; }
+#birds { pointer-events: none; }
+.console {
+  position: fixed;
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  max-width: calc(100% - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  padding: 10px 14px;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font-size: 13px;
+}
+.readout { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.readout b { font-weight: 700; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.readout span { color: var(--ink-dim); font-variant-numeric: tabular-nums; font-size: 12px; }
+#hour { width: 180px; max-width: 46vw; accent-color: var(--lagoon); }
+.btn {
+  font: 600 12px var(--ui); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink); background: transparent; border: 1px solid var(--line);
+  border-radius: 999px; padding: 8px 12px; min-height: 36px; cursor: pointer;
+}
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+.btn:focus-visible, #hour:focus-visible { outline: 2px solid var(--lagoon); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div id="poster" aria-hidden="true"></div>
+<canvas id="gl" aria-label="Animated view of the Big Lagoon in El Nido, Palawan, lit by the real sun and moon for the current time" role="img"></canvas>
+<canvas id="birds" aria-hidden="true"></canvas>
+
+<div class="console" role="group" aria-label="Scene time">
+  <div class="readout" aria-live="polite">
+    <b id="period">Day</b>
+    <span id="clock">12:00 PM · your time</span>
+  </div>
+  <input id="hour" type="range" min="0" max="24" step="0.05" value="12" aria-label="Time of day">
+  <button id="live" class="btn" aria-pressed="true" type="button">Live</button>
+  <button id="play" class="btn" aria-pressed="false" type="button">Play a day</button>
+</div>
+
+<script>
+(function () {
+  var SRC = { sunrise: 'sunrise.jpg', day: 'day.jpg', sunset: 'sunset.jpg', night: 'night.jpg' };
+  var IMG_W = 2752, IMG_H = 1536, ASP = IMG_W / IMG_H;
+  var D = Math.PI / 180;
+
+  // Sun or moon painted into each plate (uv centre, radius in image-height units), removed before the live sky is drawn
+  var BAKED = {
+    sunrise: [0, 0, 0],
+    sunset:  [0, 0, 0],
+    night:   [0, 0, 0],
+    day:     [0, 0, 0]
+  };
+
+  // Per-plate look: ripple, sparkle, fog, stars, lanterns, sky drift, birds, mist colour
+  var LOOK = {
+    sunrise: { ripple: 1.0, sparkle: 0.55, fog: 1.0, stars: 0.0, lantern: 0, drift: 1.0, birds: 0.7, fog_c: [1.0, 0.86, 0.86] },
+    day:     { ripple: 1.0, sparkle: 0.7,  fog: 0.15, stars: 0.0, lantern: 0, drift: 1.0, birds: 0.8, fog_c: [0.92, 0.96, 1.0] },
+    sunset:  { ripple: 1.0, sparkle: 0.85, fog: 0.35, stars: 0.0, lantern: 0, drift: 1.0, birds: 0.8, fog_c: [1.0, 0.72, 0.48] },
+    night:   { ripple: 0.8, sparkle: 0.55, fog: 0.15, stars: 1.0, lantern: 1, drift: 0.6, birds: 0.0, fog_c: [0.55, 0.66, 0.86] }
+  };
+
+  // ---------- sky model: El Nido, Palawan (11.2°N), scene clock = visitor's local clock ----------
+  var LAT = 11.2 * D;
+  function dayOfYear(d) { var s = new Date(d.getFullYear(), 0, 0); return Math.floor((d - s) / 86400000); }
+  function declination(doy) { return 23.44 * D * Math.sin(2 * Math.PI * (284 + doy) / 365); }
+  function elevation(hourAngleDeg, dec) {
+    return Math.asin(Math.sin(LAT) * Math.sin(dec) + Math.cos(LAT) * Math.cos(dec) * Math.cos(hourAngleDeg * D)) / D;
+  }
+  function moonAge(ms) { var jd = ms / 86400000 + 2440587.5; var a = (jd - 2451550.1) % 29.530588; return a < 0 ? a + 29.530588 : a; }
+  function sky(h, ms) {
+    var date = new Date(ms), doy = dayOfYear(date), dec = declination(doy);
+    var H = (h - 12.05) * 15;
+    var e = elevation(H, dec);
+    var age = moonAge(ms), phase = age / 29.530588;
+    var Hm = H - phase * 360; Hm = ((Hm + 540) % 360) - 180;
+    var em = elevation(Hm, 0);
+    var morning = H < 0;
+    var tw = morning ? 'sunrise' : 'sunset';
+    var A, B, f;
+    function sm(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+    if (e <= -12) { A = 'night'; B = 'night'; f = 0; }
+    else if (e < -3) { A = 'night'; B = tw; f = sm((e + 12) / 9); }
+    else if (e <= 6) { A = tw; B = tw; f = 0; }
+    else if (e < 20) { A = tw; B = 'day'; f = sm((e - 6) / 14); }
+    else { A = 'day'; B = 'day'; f = 0; }
+    return { e: e, H: H, em: em, Hm: Hm, phase: phase, morning: morning, A: A, B: B, f: f };
+  }
+  function label(s) {
+    if (s.e < -12) return 'Night';
+    if (s.e < -4) return s.morning ? 'Before dawn' : 'Blue hour';
+    if (s.e < 6) return s.morning ? 'Sunrise' : 'Sunset';
+    if (s.e < 20) return s.morning ? 'Morning light' : 'Golden hour';
+    return 'Daytime';
+  }
+  // On-screen path: rises right of the valley, climbs out of frame, sets behind the far islands
+  function skyPos(Hdeg, elev) { return [0.54 - 0.0003 * Hdeg, 0.398 - 0.0115 * elev]; }
+
+  if (!/[?&]controls\b/.test(location.search)) document.querySelector('.console').hidden = true;
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var poster = document.getElementById('poster');
+  var canvas = document.getElementById('gl');
+  var birdsCv = document.getElementById('birds');
+  var hourIn = document.getElementById('hour');
+  var liveBtn = document.getElementById('live');
+  var playBtn = document.getElementById('play');
+  var periodEl = document.getElementById('period');
+  var clockEl = document.getElementById('clock');
+
+  var state = { live: true, playing: false, hour: nowHour(), playStart: 0, playFrom: 0 };
+  function nowHour() { var d = new Date(); return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600; }
+  function fmt(h) {
+    h = ((h % 24) + 24) % 24;
+    var H = Math.floor(h), M = Math.floor((h - H) * 60);
+    var ap = H >= 12 ? 'PM' : 'AM', h12 = H % 12 === 0 ? 12 : H % 12;
+    return h12 + ':' + (M < 10 ? '0' : '') + M + ' ' + ap;
+  }
+  var s0 = sky(state.hour, Date.now());
+  poster.style.backgroundImage = 'url(' + SRC[s0.f > 0.5 ? s0.B : s0.A] + ')';
+
+  // Land silhouette against the sky (traced from the daytime photo): image-height fraction for 1024 columns
+  var SKYLINE = [0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0014,0.0026,0.0039,0.0046,0.0058,0.0072,0.0094,0.0117,0.0124,0.0124,0.0124,0.0129,0.0133,0.0156,0.0163,0.0234,0.0236,0.0241,0.0299,0.0412,0.0417,0.0417,0.0423,0.0573,0.0579,0.0579,0.0558,0.0547,0.0547,0.0553,0.0553,0.0553,0.0537,0.0515,0.0508,0.0501,0.0488,0.0471,0.0469,0.0469,0.0480,0.0498,0.0515,0.0556,0.0603,0.0654,0.0664,0.0668,0.0679,0.0690,0.0690,0.0690,0.0690,0.0701,0.0703,0.0702,0.0664,0.0612,0.0612,0.0612,0.0618,0.0618,0.0618,0.0612,0.0552,0.0469,0.0449,0.0449,0.0450,0.0485,0.0501,0.0514,0.0521,0.0531,0.0542,0.0553,0.0564,0.0591,0.0625,0.0666,0.0703,0.0762,0.0815,0.0867,0.0913,0.0978,0.1032,0.1070,0.1129,0.1165,0.1178,0.1184,0.1185,0.1198,0.1198,0.1198,0.1217,0.1224,0.1230,0.1250,0.1257,0.1262,0.1273,0.1289,0.1302,0.1323,0.1355,0.1393,0.1416,0.1445,0.1445,0.1452,0.1454,0.1465,0.1465,0.1465,0.1471,0.1478,0.1488,0.1515,0.1536,0.1536,0.1536,0.1536,0.1545,0.1615,0.1615,0.1628,0.1634,0.1634,0.1641,0.1641,0.1660,0.1660,0.1660,0.1608,0.1608,0.1612,0.1621,0.1621,0.1617,0.1615,0.1615,0.1615,0.1631,0.1641,0.1651,0.1732,0.1732,0.1732,0.1745,0.1758,0.1764,0.1777,0.1784,0.1784,0.1789,0.1800,0.1816,0.1868,0.1868,0.1868,0.1868,0.1882,0.1956,0.1985,0.1996,0.2007,0.2018,0.2036,0.2053,0.2058,0.2070,0.2093,0.2096,0.2096,0.2096,0.2098,0.2115,0.2122,0.2122,0.2129,0.2135,0.2135,0.2116,0.2116,0.2116,0.2116,0.2122,0.2122,0.2122,0.2117,0.2109,0.2109,0.2109,0.2120,0.2122,0.2129,0.2240,0.2246,0.2246,0.2251,0.2262,0.2279,0.2279,0.2279,0.2280,0.2291,0.2298,0.2306,0.2311,0.2322,0.2380,0.2428,0.2474,0.2500,0.2500,0.2507,0.2613,0.2637,0.2637,0.2633,0.2624,0.2624,0.2624,0.2653,0.2663,0.2674,0.2706,0.2741,0.2803,0.2875,0.2937,0.2962,0.2969,0.2973,0.3025,0.3077,0.3086,0.3086,0.3071,0.3000,0.2975,0.2964,0.2940,0.2929,0.2884,0.2858,0.2857,0.2852,0.2839,0.2812,0.2812,0.2806,0.2796,0.2780,0.2780,0.2780,0.2787,0.2799,0.2799,0.2786,0.2786,0.2786,0.2786,0.2781,0.2770,0.2767,0.2767,0.2767,0.2767,0.2761,0.2741,0.2726,0.2708,0.2691,0.2575,0.2493,0.2470,0.2410,0.2343,0.2331,0.2331,0.2331,0.2331,0.2285,0.2259,0.2259,0.2259,0.2259,0.2246,0.2235,0.2224,0.2220,0.2220,0.2204,0.2201,0.2201,0.2207,0.2228,0.2240,0.2259,0.2259,0.2252,0.2237,0.2233,0.2220,0.2220,0.2145,0.2142,0.2142,0.2145,0.2155,0.2155,0.2155,0.2147,0.2123,0.2105,0.2103,0.2103,0.2127,0.2152,0.2174,0.2174,0.2161,0.2141,0.2129,0.2112,0.2109,0.2109,0.2109,0.2118,0.2129,0.2160,0.2161,0.2161,0.2155,0.2155,0.2155,0.2161,0.2174,0.2195,0.2212,0.2266,0.2274,0.2285,0.2302,0.2318,0.2344,0.2348,0.2357,0.2363,0.2368,0.2370,0.2370,0.2358,0.2340,0.2337,0.2337,0.2350,0.2372,0.2389,0.2389,0.2389,0.2396,0.2468,0.2487,0.2497,0.2530,0.2549,0.2568,0.2578,0.2617,0.2651,0.2656,0.2656,0.2656,0.2663,0.2746,0.2789,0.2799,0.2806,0.2816,0.2834,0.2935,0.2992,0.3022,0.3052,0.3151,0.3172,0.3228,0.3229,0.3236,0.3236,0.3236,0.3236,0.3242,0.3242,0.3242,0.3249,0.3255,0.3272,0.3291,0.3320,0.3348,0.3361,0.3386,0.3421,0.3462,0.3490,0.3496,0.3499,0.3503,0.3515,0.3581,0.3579,0.3562,0.3538,0.3535,0.3535,0.3535,0.3535,0.3535,0.3535,0.3532,0.3522,0.3516,0.3499,0.3496,0.3490,0.3490,0.3490,0.3490,0.3490,0.3490,0.3490,0.3496,0.3503,0.3509,0.3521,0.3538,0.3556,0.3567,0.3581,0.3595,0.3613,0.3634,0.3687,0.3698,0.3726,0.3746,0.3763,0.3770,0.3776,0.3783,0.3794,0.3818,0.3836,0.3860,0.3874,0.3874,0.3862,0.3854,0.3852,0.3848,0.3843,0.3828,0.3821,0.3815,0.3815,0.3815,0.3822,0.3818,0.3815,0.3815,0.3815,0.3817,0.3822,0.3818,0.3696,0.3691,0.3687,0.3678,0.3671,0.3660,0.3649,0.3639,0.3633,0.3626,0.3620,0.3620,0.3613,0.3613,0.3613,0.3613,0.3622,0.3633,0.3639,0.3652,0.3667,0.3685,0.3742,0.3783,0.3783,0.3779,0.3770,0.3757,0.3750,0.3742,0.3731,0.3720,0.3711,0.3704,0.3698,0.3695,0.3685,0.3680,0.3675,0.3671,0.3659,0.3655,0.3646,0.3646,0.3663,0.3674,0.3685,0.3696,0.3704,0.3711,0.3717,0.3727,0.3738,0.3743,0.3750,0.3757,0.3762,0.3793,0.3802,0.3802,0.3802,0.3722,0.3711,0.3654,0.3626,0.3606,0.3576,0.3464,0.3295,0.3224,0.3216,0.3104,0.3022,0.3021,0.3021,0.3027,0.3027,0.2959,0.2884,0.2866,0.2858,0.2852,0.2852,0.2868,0.2878,0.2878,0.2874,0.2845,0.2845,0.2839,0.2839,0.2812,0.2771,0.2742,0.2693,0.2664,0.2622,0.2584,0.2561,0.2523,0.2513,0.2501,0.2493,0.2493,0.2474,0.2461,0.2459,0.2435,0.2428,0.2428,0.2428,0.2428,0.2428,0.2270,0.2246,0.2239,0.2233,0.2233,0.2229,0.2227,0.2212,0.2102,0.2081,0.2070,0.1999,0.1888,0.1874,0.1863,0.1822,0.1695,0.1680,0.1656,0.1654,0.1654,0.1647,0.1606,0.1471,0.1460,0.1445,0.1445,0.1445,0.1452,0.1452,0.1440,0.1419,0.1374,0.1342,0.1327,0.1296,0.1283,0.1283,0.1285,0.1296,0.1296,0.1278,0.1243,0.1196,0.1178,0.1177,0.1159,0.1152,0.1138,0.1133,0.1129,0.1094,0.1087,0.1065,0.1055,0.1055,0.1055,0.1061,0.1152,0.1158,0.1159,0.1154,0.1133,0.1121,0.1068,0.1055,0.1029,0.1022,0.1016,0.1016,0.1006,0.0982,0.0977,0.0977,0.0949,0.0920,0.0905,0.0898,0.0898,0.0890,0.0851,0.0840,0.0816,0.0814,0.0814,0.0819,0.0820,0.0833,0.0833,0.0830,0.0819,0.0814,0.0814,0.0814,0.0814,0.0749,0.0733,0.0703,0.0703,0.0703,0.0697,0.0697,0.0700,0.0710,0.0716,0.0716,0.0710,0.0703,0.0699,0.0690,0.0684,0.0684,0.0684,0.0684,0.0715,0.0723,0.0729,0.0729,0.0772,0.0781,0.0806,0.0807,0.0807,0.0795,0.0784,0.0781,0.0781,0.0781,0.0781,0.0782,0.0788,0.0788,0.0788,0.0788,0.0794,0.0918,0.0918,0.0964,0.0997,0.1016,0.1022,0.1022,0.1020,0.0973,0.0954,0.0936,0.0918,0.0889,0.0885,0.0885,0.0879,0.0877,0.0866,0.0866,0.0876,0.0905,0.0930,0.0956,0.0964,0.0969,0.0970,0.0990,0.0995,0.0996,0.0988,0.0983,0.0964,0.0955,0.0944,0.0938,0.0924,0.0924,0.0924,0.0931,0.0931,0.0926,0.0918,0.0918,0.0918,0.0911,0.0903,0.0874,0.0858,0.0840,0.0840,0.0840,0.0840,0.0840,0.0840,0.0846,0.0846,0.0846,0.0846,0.0801,0.0788,0.0762,0.0749,0.0742,0.0736,0.0736,0.0703,0.0650,0.0624,0.0578,0.0548,0.0422,0.0322,0.0295,0.0286,0.0280,0.0280,0.0267,0.0265,0.0234,0.0219,0.0195,0.0195,0.0195,0.0193,0.0167,0.0143,0.0130,0.0098,0.0072,0.0055,0.0046,0.0033,0.0026,0.0026,0.0026,0.0020,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0013,0.0068,0.0072,0.0072,0.0075,0.0085,0.0090,0.0091,0.0090,0.0072,0.0061,0.0057,0.0039,0.0033,0.0008,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000];
+
+  // ---------- masks (2000 x 1116 reference frame) ----------
+  var REF_W = 2000, REF_H = 1116;
+  var WATER = [[905,445],[1140,445],[1130,495],[1225,560],[1380,610],[1530,650],[1580,710],[1750,760],[2000,830],[2000,1116],[0,1116],[0,1010],[150,940],[320,880],[470,840],[570,785],[640,720],[635,620],[622,528],[760,516],[890,497]];
+  var ROCK = [[645,1030],[700,940],[760,850],[800,800],[830,768],[872,764],[912,790],[945,832],[952,880],[1000,902],[1032,960],[1022,1004],[1000,1052],[982,1116],[700,1116],[650,1062]];
+  var SLAB = [[350,860],[400,846],[455,852],[460,880],[410,900],[352,888]];
+  var SKY = [[120,0],[1720,0],[1690,40],[1620,90],[1560,150],[1480,182],[1380,212],[1300,252],[1240,300],[1200,352],[1160,420],[1140,438],[980,438],[912,410],[882,330],[822,252],[722,236],[642,270],[582,318],[522,280],[432,202],[332,152],[292,112],[252,42],[202,15]];
+  var BOATS = [[840,650,955,702],[1010,672,1124,730],[1190,652,1300,700],[1286,706,1438,774]];
+
+  function buildMask() {
+    var W = 512, H = Math.round(512 * REF_H / REF_W);
+    function layer(draw) {
+      var c = document.createElement('canvas'); c.width = W; c.height = H;
+      var x = c.getContext('2d'); x.scale(W / REF_W, H / REF_H); x.fillStyle = '#fff'; draw(x);
+      return x.getImageData(0, 0, W, H).data;
+    }
+    function poly(x, pts, op) { x.globalCompositeOperation = op || 'source-over'; x.beginPath(); pts.forEach(function (p, i) { i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]); }); x.closePath(); x.fill(); }
+    var water = layer(function (x) { poly(x, WATER); poly(x, ROCK, 'destination-out'); poly(x, SLAB, 'destination-out'); });
+
+    var boats = layer(function (x) { BOATS.forEach(function (b) { x.beginPath(); x.ellipse((b[0]+b[2])/2, (b[1]+b[3])/2, (b[2]-b[0])/2, (b[3]-b[1])/2, 0, 0, Math.PI*2); x.fill(); }); });
+    // calm zone: no surface warping around boats (and their reflections), the rock island and the slab
+    var calm = layer(function (x) {
+      BOATS.forEach(function (b) { x.beginPath(); x.ellipse((b[0]+b[2])/2, (b[1]+b[3])/2 + 10, (b[2]-b[0])*0.9, (b[3]-b[1])*1.25, 0, 0, Math.PI*2); x.fill(); });
+      x.lineJoin = 'round'; x.lineWidth = 70; x.strokeStyle = '#fff';
+      [ROCK, SLAB].forEach(function (pts) { x.beginPath(); pts.forEach(function (p, i) { i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]); }); x.closePath(); x.fill(); x.stroke(); });
+    });
+    function chan(d) { var a = new Float32Array(W * H); for (var i = 0; i < W * H; i++) a[i] = d[i * 4 + 3] / 255; return a; }
+    function blur(a, r) {
+      var t = new Float32Array(a.length), o = new Float32Array(a.length), x, y, k, s;
+      for (y = 0; y < H; y++) for (x = 0; x < W; x++) { s = 0; for (k = -r; k <= r; k++) s += a[y*W + Math.min(W-1, Math.max(0, x+k))]; t[y*W+x] = s / (2*r+1); }
+      for (y = 0; y < H; y++) for (x = 0; x < W; x++) { s = 0; for (k = -r; k <= r; k++) s += t[Math.min(H-1, Math.max(0, y+k))*W + x]; o[y*W+x] = s / (2*r+1); }
+      return o;
+    }
+    var R = blur(blur(chan(water), 6), 4), G = new Float32Array(W * H), B = blur(chan(boats), 3), A = blur(blur(chan(calm), 5), 3);
+    // sky field: 0 at the silhouette, rising to 1 a short way above it, so sun and moon slip behind land
+    for (var yy = 0; yy < H; yy++) for (var xx = 0; xx < W; xx++) {
+      var sy = SKYLINE[Math.round(xx / (W - 1) * 1023)], yn = (yy + 0.5) / H;
+      G[yy * W + xx] = Math.max(0, Math.min(1, (sy - yn) / 0.06 + 0.5 / H / 0.06));
+    }
+    var out = new Uint8Array(W * H * 4);
+    for (var i = 0; i < W * H; i++) { out[i*4] = R[i]*255; out[i*4+1] = G[i]*255; out[i*4+2] = B[i]*255; out[i*4+3] = A[i]*255; }
+    return { w: W, h: H, data: out };
+  }
+
+  // ---------- WebGL ----------
+  var gl = canvas.getContext('webgl', { antialias: false, alpha: false, premultipliedAlpha: false });
+  if (!gl) { canvas.remove(); return startUIOnly(); }
+
+  var VS = 'attribute vec2 p; varying vec2 vS; void main(){ vS = vec2(p.x*0.5+0.5, 0.5-p.y*0.5); gl_Position = vec4(p,0.,1.); }';
+  var FS = [
+    'precision highp float;',
+    'varying vec2 vS;',
+    'uniform sampler2D tA, tB, tM;',
+    'uniform float mixF, t, ripple, sparkle, fog, stars, lantern, drift, asp;',
+    'uniform vec3 fogC, bakedA, bakedB;',
+    'uniform vec2 uvS, uvO;',
+    'uniform vec4 sun;',      // xy pos, radius, strength
+    'uniform vec3 sunCol;',
+    'uniform vec4 moon;',     // xy pos, radius, strength
+    'uniform float moonPhase, warmth;',
+    'float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }',
+    'float n(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);',
+    '  return mix(mix(h(i),h(i+vec2(1,0)),f.x), mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x), f.y); }',
+    'float fbm(vec2 p){ float s=0., a=.5; for(int i=0;i<4;i++){ s+=a*n(p); p*=2.03; a*=.5; } return s; }',
+    // smooth simplex noise for the water surface (no square cells)
+    'vec3 pm(vec3 x){ return mod(((x*34.0)+1.0)*x, 289.0); }',
+    'float sn(vec2 v){',
+    '  const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);',
+    '  vec2 i = floor(v + dot(v, C.yy)); vec2 x0 = v - i + dot(i, C.xx);',
+    '  vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);',
+    '  vec4 x12 = x0.xyxy + C.xxzz; x12.xy -= i1; i = mod(i, 289.0);',
+    '  vec3 p = pm(pm(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));',
+    '  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0); m = m*m; m = m*m;',
+    '  vec3 x = 2.0 * fract(p * C.www) - 1.0; vec3 h = abs(x) - 0.5; vec3 ox = floor(x + 0.5); vec3 a0 = x - ox;',
+    '  m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);',
+    '  vec3 g; g.x = a0.x * x0.x + h.x * x0.y; g.yz = a0.yz * x12.xz + h.yz * x12.yw;',
+    '  return 130.0 * dot(m, g);',
+    '}',
+    // wave height: two crossing swells, wider than tall like real chop seen from above
+    'float wave(vec2 uv, float persp, float t){',
+    '  vec2 q = vec2(uv.x*mix(46.,13.,persp), uv.y*mix(190.,44.,persp));',
+    '  return 0.6*sn(q + vec2(t*0.22, t*0.38)) + 0.4*sn(q*1.9 + vec2(-t*0.31, t*0.27));',
+    '}',
+    // Read a plate with its painted sun/moon filled in from the surrounding sky
+    'vec3 plate(sampler2D tx, vec2 u, vec3 bk){',
+    '  vec3 c = texture2D(tx, u).rgb;',
+    '  if (bk.z <= 0.0) return c;',
+    '  vec2 dv = (u - bk.xy) * vec2(asp, 1.0); float dd = length(dv);',
+    '  float m = 1.0 - smoothstep(bk.z*1.05, bk.z*1.7, dd);',
+    '  if (m <= 0.0) return c;',
+    '  vec3 acc = vec3(0.0); float wsum = 0.0; vec2 dir = dv / max(dd, 1e-5);',
+    '  for (int i = 0; i < 16; i++) { float a = 6.2831853*float(i)/16.0; vec2 o = vec2(cos(a), sin(a));',
+    '    float w = 0.35 + max(dot(o, dir), 0.0);',
+    '    acc += w * texture2D(tx, bk.xy + o*vec2(1.0/asp, 1.0)*bk.z*1.95).rgb; wsum += w; }',
+    '  return mix(c, acc/wsum, m);',
+    '}',
+    'float lumAt(vec2 u){ return dot(mix(texture2D(tA,u).rgb, texture2D(tB,u).rgb, mixF), vec3(0.299,0.587,0.114)); }',
+    'void main(){',
+    '  vec2 uv = vS*uvS + uvO;',
+    '  vec4 m = texture2D(tM, uv);',
+    '  float water = m.r, skyM = m.g, boat = m.b, calm = m.a;',
+    '  float dispW = smoothstep(0.62, 0.98, water) * (1.0 - calm) * (1.0 - boat);',
+    '  float persp = mix(0.12, 1.0, smoothstep(0.40, 1.0, uv.y));',
+    '  vec2 q = vec2(uv.x*mix(34.,9.,persp), uv.y*mix(150.,30.,persp));',
+    '  float w0 = wave(uv, persp, t);',
+    '  vec2 e = vec2(0.0015, 0.0008);',
+    '  vec2 grad = vec2(wave(uv + vec2(e.x, 0.0), persp, t) - w0, wave(uv + vec2(0.0, e.y), persp, t) - w0);',
+    '  vec2 d = grad * vec2(0.06, 0.044) * ripple * persp * dispW;',
+    '  vec2 sq = uv*vec2(2.6,5.0) + vec2(t*0.012, 0.0);',
+    '  float skyOcc = smoothstep(0.0, 0.05, skyM) * (1.0 - smoothstep(0.394, 0.40, uv.y));',
+    '  vec2 sd = vec2(fbm(sq)-0.5, (fbm(sq+7.3)-0.5)*0.5) * 0.004 * smoothstep(0.35, 1.0, skyM) * drift;',
+    '  float bob = (sin(t*1.5 + uv.x*23.0)*0.0011 + sin(t*0.9 + uv.x*11.0)*0.0006) * boat;',
+    '  vec2 u2 = uv + d + sd + vec2(0.0, bob);',
+    '  vec3 col = mix(plate(tA, u2, bakedA), plate(tB, u2, bakedB), mixF);',
+    // low-sun warmth across the whole scene during morning light and golden hour
+    '  col *= mix(vec3(1.0), vec3(1.07, 0.98, 0.88), warmth);',
+    '  float lum = dot(col, vec3(0.299,0.587,0.114));',
+    // live sky: only inside the sky, cut at the horizon line
+    '  float skyCut = skyOcc;',
+    '  vec2 sv = (uv - sun.xy) * vec2(asp, 1.0); float sdist = length(sv);',
+    '  float sDisc = 1.0 - smoothstep(sun.z*0.9, sun.z, sdist);',
+    '  float sGlow = exp(-sdist / (sun.z*3.2)) * 0.55 + exp(-sdist / (sun.z*12.0)) * 0.25;',
+    '  col += sunCol * sGlow * sun.w * (0.2 + 0.8*skyOcc);',
+    '  vec3 core = mix(sunCol, vec3(1.0, 0.97, 0.88), 0.5 - 0.35*smoothstep(0.0, 1.0, sdist/sun.z)) * 1.3;',
+    '  col = mix(col, core, sDisc * skyCut * sun.w);',
+    '  vec2 mv = (uv - moon.xy) * vec2(asp, 1.0); float md = length(mv);',
+    '  float mDisc = 1.0 - smoothstep(moon.z*0.9, moon.z, md);',
+    '  vec2 mp = mv / moon.z; float wy = sqrt(max(1.0 - mp.y*mp.y, 0.0));',
+    '  float tx = cos(6.2831853*moonPhase) * wy; float sgn = moonPhase < 0.5 ? 1.0 : -1.0;',
+    '  float lit = smoothstep(tx - 0.06, tx + 0.06, mp.x * sgn);',
+    '  float crater = 0.86 + 0.14*fbm(mp*3.0 + 4.0);',
+    '  float illum = 0.5 - 0.5*cos(6.2831853*moonPhase);',
+    '  vec3 moonC = vec3(0.96,0.95,0.90)*crater;',
+    '  float mGlow = exp(-md / (moon.z*2.5)) * 0.4 * illum;',
+    '  col += vec3(0.75,0.82,1.0) * mGlow * moon.w * skyOcc;',
+    '  col = mix(col, moonC, mDisc * lit * skyCut * moon.w);',
+    // sun glitter path on the water under a low sun
+    '  float lowSun = step(sun.y, 0.398) * (1.0 - smoothstep(0.08, 0.30, 0.40 - sun.y));',
+    '  float path = exp(-abs(uv.x - sun.x) * mix(60.0, 14.0, persp)) * water * smoothstep(0.40, 0.46, uv.y);',
+    '  float glit = pow(n(uv*vec2(260.,700.) + vec2(t*1.2,-t*0.8)), 5.0);',
+    '  col += sunCol * path * glit * 1.6 * sun.w * lowSun;',
+    // light shimmer over the shallows
+    '  col *= 1.0 + dispW*persp*0.045*sn(uv*vec2(38.,70.) + vec2(t*0.18,-t*0.11));',
+    // sparkles on bright water
+    // glints: light catching the steep side of a wave, small and short-lived
+    '  float slope = length(grad / vec2(e.x*mix(46.,13.,persp), e.y*mix(190.,44.,persp)));',
+    '  vec2 gq = vec2(uv.x*mix(260.,90.,persp), uv.y*mix(900.,260.,persp));',
+    '  float flick = smoothstep(0.62, 0.95, sn(gq + vec2(t*0.9, -t*0.6)));',
+    '  float glint = smoothstep(1.6, 2.4, slope) * flick;',
+    '  col += vec3(1.0,0.98,0.93) * glint * 0.75 * sparkle * dispW * smoothstep(0.25, 0.7, lum) * persp * persp;',
+    // drifting low mist near the horizon
+    '  float band = smoothstep(0.36,0.46,uv.y) * (1.0 - smoothstep(0.50,0.66,uv.y));',
+    '  float mist = band * fbm(vec2(uv.x*3.5 - t*0.025, uv.y*14.0 + t*0.01));',
+    '  col = mix(col, fogC, clamp(mist*fog*0.42, 0.0, 0.5));',
+    // twinkling stars, kept off the moon
+    '  vec2 px = vec2(2.5/2752.0, 2.5/1536.0);',
+    '  float nb = 0.25*(lumAt(u2+vec2(px.x,0.0)) + lumAt(u2-vec2(px.x,0.0)) + lumAt(u2+vec2(0.0,px.y)) + lumAt(u2-vec2(0.0,px.y)));',
+    '  float starPix = smoothstep(0.05, 0.16, lumAt(u2) - nb) * skyOcc * stars * (1.0 - mDisc) * smoothstep(moon.z*1.2, moon.z*3.0, md);',
+    '  vec2 cell = floor(uv*vec2(900.,500.));',
+    '  float tw = sin(t*(2.0 + 3.0*h(cell)) + 6.283*h(cell+3.1));',
+    '  col *= 1.0 + starPix * tw * 0.45;',
+    // lantern flicker on warm pixels around the boats at night
+    '  float warm = smoothstep(0.08, 0.28, col.r - col.b) * smoothstep(0.45, 0.8, col.r);',
+    '  float fl = 0.88 + 0.22*n(vec2(t*7.0, floor(uv.x*60.0)));',
+    '  col *= mix(1.0, fl, warm * lantern * max(water, boat));',
+    '  gl_FragColor = vec4(col, 1.0);',
+    '}'
+  ].join('\n');
+
+  function sh(type, src) { var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); } return s; }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(prog)); canvas.remove(); return startUIOnly(); }
+  gl.useProgram(prog);
+  var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  var U = {}; ['tA','tB','tM','mixF','t','ripple','sparkle','fog','stars','lantern','drift','asp','fogC','bakedA','bakedB','uvS','uvO','sun','sunCol','moon','moonPhase','warmth'].forEach(function (k) { U[k] = gl.getUniformLocation(prog, k); });
+  gl.uniform1f(U.asp, ASP);
+
+  function newTex() { var tx = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tx);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); return tx; }
+
+  var mk = buildMask();
+  gl.activeTexture(gl.TEXTURE2); var mTex = newTex(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, mk.w, mk.h, 0, gl.RGBA, gl.UNSIGNED_BYTE, mk.data);
+
+  var textures = {}, pending = {};
+  function load(name) {
+    if (textures[name]) return Promise.resolve();
+    if (pending[name]) return pending[name];
+    pending[name] = new Promise(function (res) {
+      var im = new Image(); im.decoding = 'async';
+      im.onload = function () { gl.activeTexture(gl.TEXTURE5); var tx = newTex(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im); textures[name] = tx; res(); };
+      im.onerror = function () { res(); };
+      im.src = SRC[name];
+    });
+    return pending[name];
+  }
+
+  var view;
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    var w = Math.round(innerWidth * dpr), h = Math.round(innerHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    var bd = Math.min(window.devicePixelRatio || 1, 2);
+    birdsCv.width = Math.round(innerWidth * bd); birdsCv.height = Math.round(innerHeight * bd);
+    gl.viewport(0, 0, w, h);
+    var sa = w / h, sx = 1, sy = 1;
+    if (sa > ASP) sy = ASP / sa; else sx = sa / ASP;
+    var ox = (1 - sx) * 0.5, oy = (1 - sy) * 0.5;
+    gl.uniform2f(U.uvS, sx, sy); gl.uniform2f(U.uvO, ox, oy);
+    view = { sx: sx, sy: sy, ox: ox, oy: oy };
+  }
+  resize();
+  addEventListener('resize', function () { resize(); if (reduce) frame(performance.now()); });
+
+  function lerp(a, b, f) { return a + (b - a) * f; }
+  function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+  function currentHour(ms) {
+    if (state.playing) { var el = (ms - state.playStart) / 1000; return (state.playFrom + el * 0.5) % 24; }
+    if (state.live) return nowHour();
+    return state.hour;
+  }
+
+  // ---------- birds (2D overlay) ----------
+  var bx = birdsCv.getContext('2d');
+  function drawBirds(ms, amount) {
+    bx.setTransform(1, 0, 0, 1, 0, 0); bx.clearRect(0, 0, birdsCv.width, birdsCv.height);
+    if (amount <= 0.01) return;
+    var s = birdsCv.width / innerWidth, t = ms / 1000, cycle = 34;
+    var flock = [[0, 0.20, 1.0], [0.9, 0.215, 0.8], [1.7, 0.19, 0.9], [14, 0.27, 0.85], [15.1, 0.28, 0.7]];
+    bx.lineCap = 'round'; bx.lineJoin = 'round';
+    flock.forEach(function (b) {
+      var local = ((t - b[0]) % cycle + cycle) % cycle, prog = local / 22;
+      if (prog > 1) return;
+      var ix = 0.05 + prog * 0.9, iy = b[1] - prog * 0.05 + Math.sin(local * 0.8 + b[0]) * 0.006;
+      var X = (ix - view.ox) / view.sx * innerWidth, Y = (iy - view.oy) / view.sy * innerHeight;
+      var size = 7 * b[2], flap = Math.sin(local * 7 + b[0] * 3) * 0.6;
+      bx.strokeStyle = 'rgba(20,24,28,' + (0.55 * amount) + ')'; bx.lineWidth = 1.4 * s;
+      bx.beginPath();
+      bx.moveTo((X - size) * s, (Y - size * flap) * s);
+      bx.quadraticCurveTo((X - size * 0.4) * s, (Y - size * 0.2) * s, X * s, Y * s);
+      bx.quadraticCurveTo((X + size * 0.4) * s, (Y - size * 0.2) * s, (X + size) * s, (Y - size * flap) * s);
+      bx.stroke();
+    });
+  }
+
+  var lastLabel = '';
+  function frame(ms) {
+    var h = currentHour(ms);
+    var sk = sky(h, Date.now() + (h - nowHour()) * 3600000);
+    if (!textures[sk.A] || !textures[sk.B]) { load(sk.A); load(sk.B); }
+    var A = textures[sk.A] || textures[sk.B], B = textures[sk.B] || textures[sk.A];
+    if (A && B) {
+      var nameA = textures[sk.A] ? sk.A : sk.B, nameB = textures[sk.B] ? sk.B : sk.A;
+      var f = (textures[sk.A] && textures[sk.B]) ? sk.f : 0;
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, A);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, B);
+      gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, mTex);
+      gl.uniform1i(U.tA, 0); gl.uniform1i(U.tB, 1); gl.uniform1i(U.tM, 2);
+      gl.uniform3fv(U.bakedA, BAKED[nameA]); gl.uniform3fv(U.bakedB, BAKED[nameB]);
+      var la = LOOK[nameA], lb = LOOK[nameB];
+      gl.uniform1f(U.mixF, f);
+      gl.uniform1f(U.t, reduce ? 0 : (ms / 1000) % 3600);
+      gl.uniform1f(U.ripple, lerp(la.ripple, lb.ripple, f));
+      gl.uniform1f(U.sparkle, lerp(la.sparkle, lb.sparkle, f));
+      gl.uniform1f(U.fog, lerp(la.fog, lb.fog, f));
+      gl.uniform1f(U.lantern, lerp(la.lantern, lb.lantern, f));
+      gl.uniform1f(U.drift, lerp(la.drift, lb.drift, f));
+      gl.uniform3f(U.fogC, lerp(la.fog_c[0], lb.fog_c[0], f), lerp(la.fog_c[1], lb.fog_c[1], f), lerp(la.fog_c[2], lb.fog_c[2], f));
+
+      // Sun: size, colour and strength from its height
+      // Sun drops almost straight down onto the light path in each photo: the morning glow sits right of the valley, the sunset streak at its centre
+      var sp = [sk.morning ? 0.5675 + 0.0005 * Math.max(sk.e, 0) : 0.5075 + 0.0003 * Math.max(sk.e, 0), 0.398 - 0.0115 * sk.e];
+      var lowS = clamp01(1 - sk.e / 25);
+      var sunR = lerp(0.019, 0.034, lowS * lowS);
+      var sunC = [1.0, lerp(0.97, 0.62, lowS), lerp(0.88, 0.32, lowS)];
+      var sunW = clamp01((sk.e + 1.5) / 3);
+      gl.uniform4f(U.sun, sp[0], sp[1], sunR, sunW);
+      gl.uniform3f(U.sunCol, sunC[0], sunC[1], sunC[2]);
+      gl.uniform1f(U.warmth, clamp01((sk.e - 2) / 6) * clamp01((24 - sk.e) / 14) * 0.85);
+
+      // Moon: today's phase on its nightly arc, faint by day
+      var mpos = skyPos(sk.Hm, sk.em);
+      // Moon appears only once the sun is down: fades in through dusk, gone before dawn
+      var dark = clamp01((-sk.e - 1) / 6);
+      var moonW = clamp01((sk.em + 1) / 3) * dark * dark * (3 - 2 * dark);
+      // keep it in the open sky: it fades into the haze before it can reach the islands
+      moonW *= 1 - clamp01((mpos[1] - 0.22) / 0.08);
+      gl.uniform4f(U.moon, mpos[0], mpos[1], 0.03, moonW);
+      gl.uniform1f(U.moonPhase, sk.phase);
+      gl.uniform1f(U.stars, clamp01((-sk.e - 4) / 8));
+
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      if (!canvas.classList.contains('ready')) canvas.classList.add('ready');
+      drawBirds(ms, reduce ? 0 : lerp(la.birds, lb.birds, f));
+    }
+    var lb2 = label(sk);
+    if (lb2 !== lastLabel) { periodEl.textContent = lb2; lastLabel = lb2; }
+    clockEl.textContent = fmt(h) + (state.playing ? ' · playing' : state.live ? ' · your time' : ' · preview');
+    if (state.live || state.playing) hourIn.value = h.toFixed(2);
+  }
+
+  var raf = 0, running = false;
+  function loop(ms) { frame(ms); raf = requestAnimationFrame(loop); }
+  function start() { if (running || reduce) return; running = true; raf = requestAnimationFrame(loop); }
+  function stop() { running = false; cancelAnimationFrame(raf); }
+  document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
+
+  Promise.all([load(s0.A), load(s0.B)]).then(function () {
+    frame(performance.now());
+    start();
+    ['night', 'sunrise', 'day', 'sunset'].forEach(load);
+    if (reduce) setInterval(function () { frame(performance.now()); }, 60000);
+  });
+
+  // ---------- controls ----------
+  hourIn.addEventListener('input', function () {
+    state.hour = parseFloat(hourIn.value); state.live = false; state.playing = false;
+    liveBtn.setAttribute('aria-pressed', 'false'); playBtn.setAttribute('aria-pressed', 'false');
+    if (reduce) frame(performance.now());
+  });
+  liveBtn.addEventListener('click', function () {
+    state.live = true; state.playing = false;
+    liveBtn.setAttribute('aria-pressed', 'true'); playBtn.setAttribute('aria-pressed', 'false');
+    if (reduce) frame(performance.now());
+  });
+  playBtn.addEventListener('click', function () {
+    if (state.playing) { state.hour = currentHour(performance.now()); state.playing = false; playBtn.setAttribute('aria-pressed', 'false'); return; }
+    state.playFrom = parseFloat(hourIn.value); state.playStart = performance.now(); state.playing = true; state.live = false;
+    playBtn.setAttribute('aria-pressed', 'true'); liveBtn.setAttribute('aria-pressed', 'false');
+    if (reduce) { reduce = false; start(); }
+  });
+
+  function startUIOnly() { var s = sky(state.hour, Date.now()); periodEl.textContent = label(s); clockEl.textContent = fmt(state.hour) + ' · your time'; }
+})();
+</script>
+
+</body>
+</html>
