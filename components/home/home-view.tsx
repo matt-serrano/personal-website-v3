@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { LivingScene, type SceneStatus } from "@/components/living-scene"
 import { Hero } from "@/components/home/hero"
+import { LocationLabel } from "@/components/home/location-label"
 import { Panel } from "@/components/home/panel"
 
 /**
@@ -10,7 +11,7 @@ import { Panel } from "@/components/home/panel"
  * Grid areas keep the name, panel and location from ever overlapping; a short screen scrolls instead.
  */
 export function HomeView() {
-  const [, setStatus] = useState<SceneStatus | null>(null)
+  const [status, setStatus] = useState<SceneStatus | null>(null)
 
   return (
     <>
@@ -21,6 +22,9 @@ export function HomeView() {
         </div>
         <div className="home-panel">
           <Panel />
+        </div>
+        <div className="home-place">
+          <LocationLabel status={status} />
         </div>
       </main>
     </>
