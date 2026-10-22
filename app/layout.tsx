@@ -1,18 +1,17 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Anton, Archivo } from "next/font/google"
 import Script from "next/script"
 import { Analytics } from "@vercel/analytics/next"
 import { POSTER_SCRIPT } from "@/lib/elnido/poster-script"
 import "./globals.css"
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" })
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" })
+const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" })
+const archivo = Archivo({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-archivo" })
 
 export const metadata: Metadata = {
   title: "Matthew Serrano",
-  description: "Created with v0",
-  generator: "v0.app",
+  description: "Matthew Serrano, Computer Science student at Ontario Tech University.",
   icons: {
     icon: "/icon.svg",
     apple: "/apple-icon.png",
@@ -75,7 +74,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: POSTER_SCRIPT }} />
       </head>
-      <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
+      <body className={`${anton.variable} ${archivo.variable} font-sans antialiased`}>
         {process.env.NODE_ENV === "development" ? (
           <Script id="dev-runtime-guard" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: devRuntimeGuardScript }} />
         ) : null}
