@@ -172,3 +172,37 @@
 .on-scene { color: #fff; text-shadow: var(--shadow-soft); }
 .on-scene svg { filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.45)); }
 .display { font-family: var(--font-anton), Impact, 'Arial Narrow', sans-serif; font-weight: 400; text-transform: uppercase; }
+
+/* ---------- home: one full-screen view ---------- */
+.home {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-rows: auto minmax(24px, 1fr) auto;
+  grid-template-areas:
+    "hero  panel"
+    ".     ."
+    "place ring";
+  column-gap: clamp(24px, 4vw, 64px);
+  padding:
+    calc(clamp(20px, 3.4vw, 48px) + env(safe-area-inset-top, 0px))
+    calc(clamp(20px, 3.4vw, 48px) + env(safe-area-inset-right, 0px))
+    calc(clamp(16px, 2.6vw, 36px) + env(safe-area-inset-bottom, 0px))
+    calc(clamp(20px, 3.4vw, 48px) + env(safe-area-inset-left, 0px));
+}
+.home-hero { grid-area: hero; min-width: 0; }
+.home-panel { grid-area: panel; min-width: 0; }
+.home-place { grid-area: place; align-self: end; min-width: 0; }
+.home-ring { grid-area: ring; align-self: end; justify-self: end; }
+
+@media (max-width: 719px) {
+  .home {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(24px, 1fr) auto auto;
+    grid-template-areas: "hero" "panel" "." "place" "ring";
+    row-gap: 28px;
+    padding-left: calc(16px + env(safe-area-inset-left, 0px));
+    padding-right: calc(16px + env(safe-area-inset-right, 0px));
+  }
+  .home-ring { justify-self: start; }
+}
