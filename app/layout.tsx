@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import Script from "next/script"
 import { Analytics } from "@vercel/analytics/next"
+import { POSTER_SCRIPT } from "@/lib/elnido/poster-script"
 import "./globals.css"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" })
@@ -71,6 +72,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: POSTER_SCRIPT }} />
+      </head>
       <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
         {process.env.NODE_ENV === "development" ? (
           <Script id="dev-runtime-guard" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: devRuntimeGuardScript }} />
