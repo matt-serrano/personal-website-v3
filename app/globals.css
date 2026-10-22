@@ -2,11 +2,6 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-@custom-variant touch {
-  @media (hover: none), (pointer: coarse) {
-    @slot;
-  }
-}
 
 /* Single dark look: everything sits on the scene or on a darkened still. */
 :root {
