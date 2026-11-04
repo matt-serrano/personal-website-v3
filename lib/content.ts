@@ -115,7 +115,8 @@ export const locations: Location[] = [{ id: "elnido", name: "El Nido, Palawan, P
 
 export const webring = {
   home: "https://otu-ring.com",
-  logo: "https://otu-ring.com/assets/ontariotech.svg",
+  // Served from this site: otu-ring.com stopped serving its copy to other sites
+  logo: "/otu-webring.svg",
   prev: (host: string) => `https://otu-ring.com/prev.html?from=${encodeURIComponent(host)}`,
   next: (host: string) => `https://otu-ring.com/next.html?from=${encodeURIComponent(host)}`,
   fallbackHost: "otu-ring.com",
