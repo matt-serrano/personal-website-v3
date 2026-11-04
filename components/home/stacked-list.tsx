@@ -38,14 +38,14 @@ export function StackedList() {
 function Item({ item }: { item: PanelItem }) {
   return (
     <>
-      <h3 className="text-[clamp(16px,calc(1.25svh+9px),21px)] font-semibold leading-tight">
+      <h3 className="text-[clamp(15px,calc(1.6svh+4.5px),21px)] font-semibold leading-tight">
         {item.href ? (
           <a
             href={item.href}
             target="_blank"
             rel="noreferrer"
             // The ::after pads the hit area to 44px tall without moving anything
-            className="relative inline-block underline-offset-4 decoration-1 after:absolute after:-inset-x-1 after:-inset-y-3 after:content-[''] hover:underline"
+            className="relative inline-block underline-offset-4 decoration-1 after:absolute after:-inset-x-1 after:-inset-y-[13px] after:content-[''] hover:underline"
           >
             {titleHead(item.title)}
             {/* The last word and the arrow stay together, so a wrapped title keeps its arrow beside it */}
@@ -66,7 +66,7 @@ function Item({ item }: { item: PanelItem }) {
           item.title
         )}
       </h3>
-      <p className="home-item-line mt-1 text-[clamp(13px,calc(0.5svh+9.5px),15px)] leading-snug text-white/70">
+      <p className="home-item-line mt-1 text-[clamp(12px,calc(0.7svh+7px),15px)] leading-snug text-white/70">
         {item.line}
         {item.date ? <span className="whitespace-nowrap"> · {item.date}</span> : null}
       </p>

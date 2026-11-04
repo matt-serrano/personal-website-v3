@@ -251,7 +251,7 @@
    * and the rule and caption keep the full column width the caption needs.
    */
   .masthead { container-type: inline-size; width: auto; }
-  .masthead-name { font-size: max(32px, min(100cqw / 3.5623, calc(10.55svh - 34px))); }
+  .masthead-name { font-size: max(32px, min(100cqw / 3.5623, calc(8svh - 6px))); }
   .masthead-rule { margin-top: clamp(8px, calc(1.8svh - 4px), 16px); }
   .masthead-caption { margin-top: clamp(6px, calc(1.4svh - 3px), 12px); }
   .home-wide, .home-panel, .home-place { display: none; }
