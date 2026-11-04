@@ -190,16 +190,84 @@
 .home-place { grid-area: place; align-self: end; min-width: 0; }
 .home-ring { grid-area: ring; align-self: end; justify-self: end; }
 
-@media (max-width: 719px) {
+.home-list, .home-links { display: none; }
+
+/* ---------- masthead: name, hairline, caption ---------- */
+.masthead { width: fit-content; }
+.masthead-name { font-size: clamp(64px, 10vw, 156px); line-height: 0.85; letter-spacing: -0.01em; }
+/* Each line clips its own rise; the padding keeps the clip clear of the glyphs at this tight line-height */
+.masthead-line { display: block; overflow: hidden; padding-block: 0.08em; margin-block: -0.08em; }
+.masthead-line > span { display: block; }
+.masthead-rule { height: 1px; margin-top: 16px; background: rgba(255, 255, 255, 0.3); }
+.masthead-caption {
+  display: flex; justify-content: space-between; gap: 24px; margin-top: 12px;
+  font-size: 11px; font-weight: 600; line-height: 1.6; letter-spacing: 0.18em; text-transform: uppercase;
+  /* Brighter here, where the caption sits on the unshaded sky */
+  color: rgba(255, 255, 255, 0.85);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .masthead-line > span { animation: masthead-rise 500ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .masthead-line + .masthead-line > span { animation-delay: 80ms; }
+  .masthead-rule { transform-origin: left; animation: masthead-draw 500ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both; }
+  .masthead-caption { animation: masthead-fade 400ms ease-out 720ms both; }
+}
+@keyframes masthead-rise { from { transform: translateY(100%); } }
+@keyframes masthead-draw { from { transform: scaleX(0); } }
+@keyframes masthead-fade { from { opacity: 0; } }
+
+/*
+ * Phones and portrait tablets (iPad Pro included): one centered column that fits a single screen,
+ * the whole list shown instead of the panel. Landscape tablets and laptops keep the desktop layout.
+ */
+@media (max-width: 1023px), (max-width: 1200px) and (orientation: portrait) {
   .home {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto minmax(24px, 1fr) auto auto;
-    grid-template-areas: "hero" "panel" "." "place" "ring";
-    row-gap: 28px;
+    --col: 360px;
+    grid-template-columns: minmax(0, var(--col));
+    grid-template-rows: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+    grid-template-areas: "." "hero" "list" "foot" ".";
+    justify-content: center;
+    --row-gap: clamp(10px, calc(9svh - 56px), 44px);
+    row-gap: var(--row-gap);
+    /* Space above EXPERIENCE: 48px on a tall screen, tighter on a phone */
+    --list-gap: clamp(12px, calc(8svh - 40px), 48px);
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     padding-left: calc(16px + env(safe-area-inset-left, 0px));
     padding-right: calc(16px + env(safe-area-inset-right, 0px));
   }
-  .home-ring { justify-self: start; }
+  /* The photo is toned down and a scrim sits behind the column, so text needs no shadow to stay legible */
+  .scene { filter: brightness(0.8) saturate(0.85); }
+  .home::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.58) 25%, rgba(0, 0, 0, 0.58) 85%, rgba(0, 0, 0, 0.3) 100%);
+  }
+  .home .on-scene { text-shadow: none; }
+  /* 80% is the least that clears 4.5:1 at the top of the scrim */
+  .masthead-caption { color: rgba(255, 255, 255, 0.8); }
+  .home .on-scene svg, .home .on-scene img { filter: none; }
+  /*
+   * The masthead fills the column. "MATTHEW" is 3.5623em wide, so it spans the column exactly when the
+   * screen is tall enough (iPad); on phones it is capped by height so the page still fits one screen,
+   * and the rule and caption keep the full column width the caption needs.
+   */
+  .masthead { container-type: inline-size; width: auto; }
+  .masthead-name { font-size: max(32px, min(100cqw / 3.5623, calc(10.55svh - 34px))); }
+  .masthead-rule { margin-top: clamp(8px, calc(1.8svh - 4px), 16px); }
+  .masthead-caption { margin-top: clamp(6px, calc(1.4svh - 3px), 12px); }
+  .home-wide, .home-panel, .home-place { display: none; }
+  .home-list { display: block; grid-area: list; min-width: 0; margin-top: calc(var(--list-gap) - var(--row-gap)); }
+  /* Icons and webring share one footer row: icons on the left gutter, webring arrows on the right */
+  .home-links { display: block; grid-area: foot; justify-self: start; margin-left: -12px; }
+  .home-ring { grid-area: foot; justify-self: end; align-self: center; margin-right: -7px; }
+  .webring-logo { opacity: 1; }
+}
+/* Wider than a phone: a wider column so long titles stay on one line. The scrim stays full width, as on phones */
+@media (min-width: 600px) and (max-width: 1023px), (min-width: 600px) and (max-width: 1200px) and (orientation: portrait) {
+  .home { --col: 420px; }
+}
+/* Short phones (iPhone SE): drop the line under each title so the column still fits */
+@media (max-width: 1023px) and (max-height: 600px) {
+  .home-item-line { display: none; }
 }
 
 /* ---------- inner pages: the matching still, darkened ---------- */

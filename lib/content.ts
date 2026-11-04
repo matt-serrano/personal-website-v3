@@ -3,7 +3,11 @@
 export const person = {
   firstName: "Matthew",
   lastName: "Serrano",
-  tagline: "Computer Science Student at Ontario Tech University",
+  /** The masthead caption: two short lines on each side of the row under the name. */
+  caption: {
+    left: ["Computer Science", "Ontario Tech University"],
+    right: ["Toronto", "Ontario"],
+  },
 }
 
 export type IconName = "linkedin" | "github" | "email"
@@ -23,6 +27,8 @@ export type PanelItem = {
   title: string
   /** One line under the title. */
   line: string
+  /** Shown after the line, e.g. "May 2026 – Present". */
+  date?: string
   description: string
   href?: string
 }
@@ -31,20 +37,29 @@ export const experience: PanelItem[] = [
   {
     title: "IT Systems Analyst",
     line: "Ontario Public Service",
-    description: "Government of Ontario. May 2026 – Present.",
+    date: "May 2026 – Present",
+    description:
+      "Government of Ontario, Ministry of Public and Business Service Delivery and Procurement, Natural Resources Solutions Division.",
   },
   {
-    title: "Software Engineer",
+    title: "Software Engineer Intern",
     line: "Purchs",
-    description: "AI wholesale platform for CPG brands & retailers. November 2025 – March 2026.",
+    date: "November 2025 – March 2026",
+    description: "AI wholesale platform for CPG brands & retailers.",
   },
 ]
 
-// Each href is the project's demo video or post.
+// Each href is the project's live site, demo video or post. Lines name the stack, newest project first.
 export const projects: PanelItem[] = [
   {
+    title: "Natural Resources Information Portal",
+    line: "Ontario Public Service · Salesforce",
+    description: "Ontario's public portal for natural resources information, services and applications.",
+    href: "https://nrip.mnr.gov.on.ca/s/?language=en_US",
+  },
+  {
     title: "AI-Powered Finance Application",
-    line: "HackHive 2026",
+    line: "Next.js · Recharts · HackHive 2026",
     description: "Analyzing financial data with AI to deliver insights and forecasts.",
     href: "https://youtu.be/3ftBPUnSn78",
   },
@@ -56,7 +71,7 @@ export const projects: PanelItem[] = [
   },
   {
     title: "Baseball Pitch Sign Detector",
-    line: "Computer vision",
+    line: "Python · MediaPipe · TensorFlow",
     description: "Using computer vision to detect and interpret pitch signals in real time.",
     href: "https://www.linkedin.com/posts/matthew-serrano-13a11b312_computervision-machinelearning-python-activity-7385698204345876480-yUkw?utm_source=share&utm_medium=member_desktop&rcm=ACoAAAMCKH0B3YNGn-PtbICXRmstpv3is2iMdUw",
   },

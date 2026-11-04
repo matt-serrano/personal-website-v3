@@ -3,15 +3,17 @@
 import { useEffect, useRef } from "react"
 import { buildMask } from "@/lib/elnido/masks"
 import { FS, VS } from "@/lib/elnido/shader"
-import { ASP, BAKED, LOOK, SRC, fmt, label, nowHour, posterPlate, sky, skyAt, skyPos, type Plate } from "@/lib/elnido/sky"
+import { ASP, BAKED, LOOK, SRC, fmt, label, nowHour, posterPlate, sky, skyAt, skyPos, type Plate, type Zone } from "@/lib/elnido/sky"
 
-export type SceneStatus = { label: string; clock: string; mode: "live" | "preview" | "playing" }
+export type SceneStatus = { label: string; clock: string; mode: "live" | "elnido" | "preview" | "playing" }
 
 type ClockState = { live: boolean; playing: boolean; hour: number; playStart: number; playFrom: number }
 
 type Props = {
   /** Called when the time-of-day label or the displayed minute changes. */
   onStatus?: (status: SceneStatus) => void
+  /** Whose clock the live scene follows: the visitor's, or El Nido's. */
+  zone?: Zone
 }
 
 const IS_DEV = process.env.NODE_ENV === "development"
@@ -20,16 +22,24 @@ const IS_DEV = process.env.NODE_ENV === "development"
  * Full-screen El Nido background. The still photo shows first (see lib/elnido/poster-script.ts),
  * then the WebGL scene is set up after first paint and fades in over it.
  */
-export function LivingScene({ onStatus }: Props) {
+export function LivingScene({ onStatus, zone = "local" }: Props) {
   const posterRef = useRef<HTMLDivElement>(null)
   const glRef = useRef<HTMLCanvasElement>(null)
   const birdsRef = useRef<HTMLCanvasElement>(null)
   const consoleRef = useRef<HTMLDivElement>(null)
   const onStatusRef = useRef(onStatus)
+  const zoneRef = useRef(zone)
+  const redrawRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     onStatusRef.current = onStatus
   }, [onStatus])
+
+  // Redraw straight away so a paused (reduced-motion) scene and the status line follow the new clock
+  useEffect(() => {
+    zoneRef.current = zone
+    redrawRef.current?.()
+  }, [zone])
 
   useEffect(() => {
     const poster = posterRef.current!
@@ -44,23 +54,23 @@ export function LivingScene({ onStatus }: Props) {
     if (consoleEl) consoleEl.hidden = false
 
     let reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    const state: ClockState = { live: true, playing: false, hour: nowHour(), playStart: 0, playFrom: 0 }
+    const state: ClockState = { live: true, playing: false, hour: nowHour(zoneRef.current), playStart: 0, playFrom: 0 }
     // Dev only: ?controls&hour=18.25 opens the preview at a fixed hour
     const fixed = controls ? parseFloat(params.get("hour") ?? "") : NaN
     if (!isNaN(fixed)) { state.hour = ((fixed % 24) + 24) % 24; state.live = false }
     if (hourIn) hourIn.value = state.hour.toFixed(2)
     liveBtn?.setAttribute("aria-pressed", String(state.live))
 
-    let lastLabel = "", lastClock = ""
+    let lastLabel = "", lastClock = "", lastMode = ""
     function report(h: number, lb: string) {
-      const mode = state.playing ? "playing" : state.live ? "live" : "preview"
+      const mode = state.playing ? "playing" : !state.live ? "preview" : zoneRef.current === "elnido" ? "elnido" : "live"
       const clock = fmt(h)
-      if (lb === lastLabel && clock === lastClock) return
-      lastLabel = lb; lastClock = clock
+      if (lb === lastLabel && clock === lastClock && mode === lastMode) return
+      lastLabel = lb; lastClock = clock; lastMode = mode
       onStatusRef.current?.({ label: lb, clock, mode })
     }
 
-    const s0 = skyAt(state.hour)
+    const s0 = skyAt(state.hour, zoneRef.current)
     poster.style.backgroundImage = "url(" + SRC[posterPlate(s0)] + ")"
 
     let disposed = false
@@ -70,7 +80,13 @@ export function LivingScene({ onStatus }: Props) {
       t.addEventListener(type, fn); cleanups.push(() => t.removeEventListener(type, fn))
     }
 
-    function startUIOnly() { const s = skyAt(state.hour); report(state.hour, label(s)) }
+    // Without WebGL the still photo is the scene, so it changes with the clock too
+    function startUIOnly() {
+      const h = state.live ? nowHour(zoneRef.current) : state.hour, s = skyAt(h, zoneRef.current)
+      poster.style.backgroundImage = "url(" + SRC[posterPlate(s)] + ")"
+      report(h, label(s))
+    }
+    redrawRef.current = startUIOnly
 
     function init() {
       if (disposed) return
@@ -140,7 +156,7 @@ export function LivingScene({ onStatus }: Props) {
       function clamp01(x: number) { return Math.max(0, Math.min(1, x)) }
       function currentHour(ms: number) {
         if (state.playing) { const el = (ms - state.playStart) / 1000; return (state.playFrom + el * 0.5) % 24 }
-        if (state.live) return nowHour()
+        if (state.live) return nowHour(zoneRef.current)
         return state.hour
       }
 
@@ -170,7 +186,7 @@ export function LivingScene({ onStatus }: Props) {
       function frame(ms: number) {
         if (disposed) return
         const h = currentHour(ms)
-        const sk = sky(h, Date.now() + (h - nowHour()) * 3600000)
+        const sk = sky(h, Date.now() + (h - nowHour(zoneRef.current)) * 3600000)
         if (!textures[sk.A] || !textures[sk.B]) { load(sk.A); load(sk.B) }
         const A = textures[sk.A] || textures[sk.B], B = textures[sk.B] || textures[sk.A]
         if (A && B) {
@@ -230,6 +246,7 @@ export function LivingScene({ onStatus }: Props) {
       Promise.all([load(s0.A), load(s0.B)]).then(function () {
         if (disposed) return
         frame(performance.now())
+        redrawRef.current = function () { frame(performance.now()) }
         start()
         ;(["night", "sunrise", "day", "sunset"] as Plate[]).forEach(load)
         if (reduce) slowTimer = window.setInterval(function () { frame(performance.now()) }, 60000)
@@ -263,6 +280,7 @@ export function LivingScene({ onStatus }: Props) {
 
     return () => {
       disposed = true
+      redrawRef.current = null
       cancelAnimationFrame(bootRaf)
       clearTimeout(bootTimer)
       clearInterval(slowTimer)
@@ -284,8 +302,9 @@ export function LivingScene({ onStatus }: Props) {
       {IS_DEV ? (
         <div ref={consoleRef} className="scene-console" role="group" aria-label="Scene time (development)" hidden>
           <input data-hour type="range" min="0" max="24" step="0.05" defaultValue="12" aria-label="Time of day" />
-          <button data-live type="button" aria-pressed="true">Live</button>
-          <button data-play type="button" aria-pressed="false">Play a day</button>
+          {/* Form-fill extensions stamp attributes like fdprocessedid onto buttons before hydration */}
+          <button data-live type="button" suppressHydrationWarning aria-pressed="true">Live</button>
+          <button data-play type="button" suppressHydrationWarning aria-pressed="false">Play a day</button>
         </div>
       ) : null}
     </div>

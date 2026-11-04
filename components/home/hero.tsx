@@ -1,34 +1,76 @@
+import type { ReactNode } from "react"
 import { LinkIcon } from "@/components/link-icon"
 import { links, person } from "@/lib/content"
+import { cn } from "@/lib/utils"
 
+/**
+ * Editorial masthead: the name, a hairline the same width, then a two-column caption.
+ * Each name line rises out of its own clip, then the rule draws in and the caption fades up.
+ */
 export function Hero() {
+  const { left, right } = person.caption
   return (
     <header className="on-scene">
-      <h1 className="display text-[clamp(64px,10vw,156px)] leading-[0.88]">
-        {person.firstName}
-        <br />
-        {person.lastName}
-      </h1>
-      <p className="mt-4 max-w-[34ch] text-[clamp(16px,1.35vw,21px)] font-medium leading-snug">{person.tagline}</p>
-      <ul className="mt-2 -ml-1 flex flex-wrap gap-x-5" aria-label="Links">
-        {links.map((link) => {
-          const external = link.href.startsWith("http")
-          return (
-            <li key={link.label}>
-              <a
-                href={link.href}
-                target={external ? "_blank" : undefined}
-                rel={external ? "noreferrer" : undefined}
-                aria-label={external ? `${link.label} (opens in a new tab)` : `${link.label}: ${link.text}`}
-                className="inline-flex min-h-11 items-center gap-2 px-1 text-[13px] font-semibold uppercase tracking-[0.1em] underline-offset-[5px] hover:underline"
-              >
-                <LinkIcon name={link.icon} />
-                {link.label}
-              </a>
-            </li>
-          )
-        })}
-      </ul>
+      {/* Sized to the name, so the rule and caption match its width */}
+      <div className="masthead">
+        <h1 className="masthead-name display">
+          <span className="masthead-line">
+            <span>{person.firstName}</span>
+          </span>{" "}
+          <span className="masthead-line">
+            <span>{person.lastName}</span>
+          </span>
+        </h1>
+        <div aria-hidden="true" className="masthead-rule" />
+        <div className="masthead-caption">
+          <p>
+            {left[0]}
+            <br />
+            {left[1]}
+          </p>
+          <p className="text-right">
+            {right[0]}
+            <br />
+            {right[1]}
+          </p>
+        </div>
+      </div>
+      {/* On small screens the links move below the stacked list instead */}
+      <HeroLinks className="home-wide mt-4 -ml-1" />
     </header>
+  )
+}
+
+type HeroLinksProps = { className?: string; iconOnly?: boolean; children?: ReactNode }
+
+/** Social links; `iconOnly` drops the labels (screen readers still get them), `children` adds trailing items. */
+export function HeroLinks({ className, iconOnly = false, children }: HeroLinksProps) {
+  return (
+    <ul className={cn("flex flex-wrap", iconOnly ? "gap-x-3" : "gap-x-5", className)} aria-label="Links">
+      {links.map((link) => {
+        const external = link.href.startsWith("http")
+        return (
+          <li key={link.label}>
+            <a
+              href={link.href}
+              target={external ? "_blank" : undefined}
+              rel={external ? "noreferrer" : undefined}
+              aria-label={external ? `${link.label} (opens in a new tab)` : `${link.label}: ${link.text}`}
+              title={iconOnly ? link.label : undefined}
+              className={cn(
+                "inline-flex min-h-11 items-center",
+                iconOnly
+                  ? "min-w-11 justify-center opacity-90 hover:opacity-100"
+                  : "gap-2 px-1 text-[13px] font-semibold uppercase tracking-[0.1em] underline-offset-[5px] hover:underline",
+              )}
+            >
+              <LinkIcon name={link.icon} size={iconOnly ? 20 : 15} />
+              {iconOnly ? null : link.label}
+            </a>
+          </li>
+        )
+      })}
+      {children}
+    </ul>
   )
 }

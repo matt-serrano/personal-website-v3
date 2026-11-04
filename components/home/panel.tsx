@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useState, type KeyboardEvent } from "react"
+import { ArrowUpRight } from "lucide-react"
 import { LineArrow } from "@/components/line-arrow"
 import { experience, projects, type PanelItem } from "@/lib/content"
 import { cn } from "@/lib/utils"
@@ -13,6 +14,8 @@ const GROUPS = [
 // Every item in order, so the arrows walk from the last job straight into the first project
 const FLAT = GROUPS.flatMap((g, gi) => g.items.map((item: PanelItem, i) => ({ item, gi, i })))
 const pad = (n: number) => String(n).padStart(2, "0")
+const titleHead = (t: string) => t.slice(0, t.lastIndexOf(" ") + 1)
+const titleTail = (t: string) => t.slice(t.lastIndexOf(" ") + 1)
 
 export function Panel() {
   const [index, setIndex] = useState(0)
@@ -34,7 +37,7 @@ export function Panel() {
 
   return (
     <section aria-label="Experience and projects" className="on-scene border-t border-white/40">
-      <div role="tablist" aria-label="Show" className="flex gap-6" onKeyDown={onTabKey}>
+      <div role="tablist" aria-label="Show" className="flex" onKeyDown={onTabKey}>
         {GROUPS.map((g, n) => {
           const selected = n === gi
           return (
@@ -44,6 +47,8 @@ export function Panel() {
                 tabRefs.current[n] = el
               }}
               id={`tab-${g.id}`}
+              // Form-fill extensions stamp attributes like fdprocessedid onto buttons before hydration
+              suppressHydrationWarning
               type="button"
               role="tab"
               aria-selected={selected}
@@ -51,7 +56,7 @@ export function Panel() {
               tabIndex={selected ? 0 : -1}
               onClick={() => jumpTo(n)}
               className={cn(
-                "relative min-h-11 text-[12px] font-semibold uppercase tracking-[0.14em]",
+                "relative min-h-11 flex-1 text-center text-[12px] font-semibold uppercase tracking-[0.14em]",
                 "after:absolute after:inset-x-0 after:bottom-2 after:h-[2px] after:bg-white after:content-['']",
                 selected ? "text-white" : "text-white/72 after:opacity-0 hover:text-white",
               )}
@@ -71,17 +76,38 @@ export function Panel() {
             {group.label} {i + 1} of {total}: {item.title}
           </span>
         </p>
-        <h2 className="display mt-2 text-[30px] leading-[1.02]">
+        {/* Linked titles get looser leading so a hover underline on a wrapped first line clears the second */}
+        <h2 className={cn("mt-2 text-[24px] font-semibold", item.href ? "leading-[1.3]" : "leading-[1.15]")}>
           {item.href ? (
             <a href={item.href} target="_blank" rel="noreferrer" className="underline-offset-[6px] decoration-1 hover:underline">
-              {item.title}
+              {titleHead(item.title)}
+              {/* The last word and the icon stay together so the icon never wraps onto a line alone */}
+              <span className="whitespace-nowrap">
+                {titleTail(item.title)}
+                <ArrowUpRight
+                  width={20}
+                  height={20}
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                  focusable="false"
+                  className="ml-1 inline-block align-[0.1em] opacity-80"
+                />
+              </span>
               <span className="sr-only"> (opens in a new tab)</span>
             </a>
           ) : (
             item.title
           )}
         </h2>
-        <p className="mt-2 text-[15px] font-medium">{item.line}</p>
+        <p className="mt-2 text-[15px] font-medium">
+          {item.line}
+          {item.date ? (
+            <>
+              {" "}
+              <span className="text-white/60">|</span> <span className="whitespace-nowrap">{item.date}</span>
+            </>
+          ) : null}
+        </p>
         <p className="mt-1.5 text-[14px] leading-relaxed text-white/85">{item.description}</p>
       </div>
 
@@ -95,10 +121,10 @@ export function Panel() {
           ))}
         </div>
         <div className="-mr-2 flex">
-          <button type="button" aria-label="Previous item" onClick={() => step(-1)} className="group grid h-11 w-11 place-items-center">
+          <button type="button" suppressHydrationWarning aria-label="Previous item" onClick={() => step(-1)} className="group grid h-11 w-11 place-items-center">
             <LineArrow direction="left" />
           </button>
-          <button type="button" aria-label="Next item" onClick={() => step(1)} className="group grid h-11 w-11 place-items-center">
+          <button type="button" suppressHydrationWarning aria-label="Next item" onClick={() => step(1)} className="group grid h-11 w-11 place-items-center">
             <LineArrow />
           </button>
         </div>

@@ -67,7 +67,13 @@ export function label(s: Sky) {
 // On-screen path: rises right of the valley, climbs out of frame, sets behind the far islands
 export function skyPos(Hdeg: number, elev: number): [number, number] { return [0.54 - 0.0003 * Hdeg, 0.398 - 0.0115 * elev] }
 
-export function nowHour() { const d = new Date(); return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600 }
+// "local" is the visitor's clock; El Nido keeps Philippine time, UTC+8 with no daylight saving
+export type Zone = "local" | "elnido"
+export function nowHour(zone: Zone = "local") {
+  const d = new Date()
+  if (zone === "elnido") return (d.getUTCHours() + 8 + d.getUTCMinutes() / 60 + d.getUTCSeconds() / 3600) % 24
+  return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600
+}
 export function fmt(h: number) {
   h = ((h % 24) + 24) % 24
   const H = Math.floor(h), M = Math.floor((h - H) * 60)
@@ -76,7 +82,7 @@ export function fmt(h: number) {
 }
 
 // Sky at a scene hour, dated relative to now (as the scene's frame loop does)
-export function skyAt(h: number) { return sky(h, Date.now() + (h - nowHour()) * 3600000) }
+export function skyAt(h: number, zone: Zone = "local") { return sky(h, Date.now() + (h - nowHour(zone)) * 3600000) }
 // The still photo that matches a sky, as the scene picks its poster
 export function posterPlate(s: Sky): Plate { return s.f > 0.5 ? s.B : s.A }
 
