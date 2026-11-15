@@ -145,7 +145,8 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
         const sa = w / h
         let sx = 1, sy = 1
         if (sa > ASP) sy = ASP / sa; else sx = sa / ASP
-        const ox = (1 - sx) * 0.5, oy = (1 - sy) * 0.5
+        // Cover crop at "center 60%" (--scene-position): a little less sky, a little more cliff and water
+        const ox = (1 - sx) * 0.5, oy = (1 - sy) * 0.6
         gl!.uniform2f(U.uvS, sx, sy); gl!.uniform2f(U.uvO, ox, oy)
         view = { sx: sx, sy: sy, ox: ox, oy: oy }
       }

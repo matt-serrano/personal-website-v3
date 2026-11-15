@@ -193,7 +193,7 @@
 .scene-poster {
   background-color: #071017;
   background-image: var(--scene-poster, none);
-  background-position: center;
+  background-position: var(--scene-position);
   background-size: cover;
   background-repeat: no-repeat;
 }
