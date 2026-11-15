@@ -40,6 +40,55 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* ---------- home design tokens (desktop values; small screens override below) ---------- */
+  /* Type sizes */
+  --fs-name: clamp(64px, 10vw, 128px);
+  --fs-caption: 13px;
+  --fs-label: 13px;
+  --fs-title: 22px;
+  --fs-subtitle: 16px;
+  /* Body-font weights */
+  --fw-regular: 400;
+  --fw-caption: 500;
+  --fw-strong: 600;
+  /* Line heights */
+  --lh-name: 0.85;
+  --lh-caption: 1.6;
+  --lh-title: 1.25;
+  --lh-subtitle: 1.4;
+  /* Letter spacing */
+  --ls-name: -0.01em;
+  --ls-caps: 0.14em;
+  --ls-title: -0.01em;
+  /* Text tones on the scene */
+  --tone-text: #fff;
+  --tone-caption: rgba(255, 255, 255, 0.8);
+  --tone-label: rgba(255, 255, 255, 0.7);
+  --tone-subtitle: rgba(255, 255, 255, 0.85);
+  --shadow-text: 0 1px 2px rgba(0, 0, 0, 0.35);
+  /* The photo and the scrims over it */
+  --scene-filter: brightness(1.05) saturate(1.25) contrast(1.05);
+  --scene-position: center 60%;
+  --scrim-left: linear-gradient(to right, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0) 62%);
+  --scrim-top: linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0) 20%);
+  /* Icons and tap targets */
+  --icon-size: 22px;
+  --tap-size: 44px;
+}
+
+/* Small screens (phones and portrait tablets, the same query as the centered layout) */
+@media (max-width: 1023px), (max-width: 1200px) and (orientation: portrait) {
+  :root {
+    --fs-name: min(100cqw / 3.5623, 88px);
+    --fs-caption: 12px;
+    --fs-label: 12px;
+    --fs-title: 19px;
+    --fs-subtitle: 15px;
+  }
+}
+@media (min-width: 600px) and (max-width: 1023px), (min-width: 600px) and (max-width: 1200px) and (orientation: portrait) {
+  :root { --fs-name: min(100cqw / 3.5623, 128px); }
 }
 
 .dark {
