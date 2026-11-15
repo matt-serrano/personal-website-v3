@@ -103,7 +103,7 @@
 /* Small screens (phones and portrait tablets, the same query as the centered layout) */
 @media (max-width: 1023px), (max-width: 1200px) and (orientation: portrait) {
   :root {
-    --fs-name: clamp(3.5rem, 16vw, 6rem);
+    --fs-name: 3.9rem;
     --fs-caption: 0.75rem;
     --fs-label: 0.75rem;
     --fs-title: 1.1875rem;
@@ -193,6 +193,16 @@
   }
   html {
     color-scheme: dark;
+  }
+  /*
+   * The home page scales as one: every size on it is in rem, and the root follows the smaller of the
+   * screen's width and height, so the phone layout keeps its proportions and always fits one screen.
+   * The phone column is about 62rem tall, so the root may be at most 1.61svh; 1.58 leaves ~2% to spare.
+   * The 10px floor is what a 375x667 iPhone SE needs (10.5px); 11px would push the icon row off-screen.
+   * Inner pages keep the browser's root size.
+   */
+  html:has(.home) {
+    font-size: clamp(10px, min(4.1vw, 1.58svh), 18px);
   }
   body {
     background: var(--ground);
@@ -328,7 +338,9 @@
     grid-template-columns: minmax(0, calc(var(--container) - 2 * var(--gutter)));
     grid-template-rows: auto auto auto;
     grid-template-areas: "hero" "list" "foot";
-    /* Top-aligned at full spacing; a long page scrolls rather than squeezing to fit the screen */
+    /* Exactly one screen: the fluid root scales the whole column to fit, so nothing scrolls or squeezes */
+    height: 100svh;
+    overflow: hidden;
     justify-content: center;
     align-content: start;
     /* Captions to EXPERIENCE, and the last project to the icon row */
@@ -338,7 +350,6 @@
     padding-left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
     padding-right: calc(var(--gutter) + env(safe-area-inset-right, 0px));
   }
-  .home { overflow-x: clip; }
   .home::before { background: var(--scrim-top); }
   /*
    * The left scrim runs from the top of the screen to the icon row and no further, so the water below
@@ -351,7 +362,7 @@
     mask-image: linear-gradient(to bottom, #000 calc(100% - var(--space-32)), transparent);
   }
   .home .on-scene svg, .home .on-scene img { filter: none; }
-  /* The name takes about two thirds of the column; the rule and caption span it gutter to gutter */
+  /* The name takes about two thirds of the column (16vw at the base); the rule and caption span it gutter to gutter */
   .masthead { width: auto; }
   /* Keeps the lines' clip margins inside the name, so it sits exactly at the top padding and --space-16 above the rule */
   .masthead-name { display: flow-root; }
