@@ -1,8 +1,9 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Anton, Archivo } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { POSTER_SCRIPT } from "@/lib/elnido/poster-script"
+import { THEME } from "@/lib/elnido/sky"
 import "./globals.css"
 
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" })
@@ -16,6 +17,9 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
 }
+
+// Fallback; the poster script puts the colour at the top of the plate it picks ahead of it
+export const viewport: Viewport = { themeColor: THEME.day }
 
 export default function RootLayout({
   children,

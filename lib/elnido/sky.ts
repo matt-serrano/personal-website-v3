@@ -10,6 +10,39 @@ export const SRC: Record<Plate, string> = {
   night: "/scenery/elnido/night.jpg",
 }
 export const IMG_W = 2752, IMG_H = 1536, ASP = IMG_W / IMG_H
+
+// Each plate is also encoded as AVIF and WebP at these widths (the largest is the original size)
+export const PLATE_WIDTHS = [1280, 1920, 2752]
+// Browser colour for each plate: the top rows of the photo with the scene filter and top scrim applied
+export const THEME: Record<Plate, string> = { sunrise: "#be9390", day: "#88a2b5", sunset: "#933e28", night: "#142f4f" }
+
+/** The smallest encoded width that covers this screen at up to 2x density (keep in step with poster-script.ts). */
+export function plateWidth() {
+  const need = Math.max(innerWidth, innerHeight * ASP) * Math.min(window.devicePixelRatio || 1, 2)
+  return PLATE_WIDTHS.find((w) => w >= need) ?? PLATE_WIDTHS[PLATE_WIDTHS.length - 1]
+}
+const plateFile = (p: Plate, w: number, ext: string) => "/scenery/elnido/" + p + "-" + w + "." + ext
+
+/** CSS background for a still: AVIF or WebP at the right width where image-set() can pick by type, else the JPEG. */
+export function posterImage(p: Plate) {
+  const w = plateWidth()
+  return CSS.supports("background-image", 'image-set(url("x.avif") type("image/avif"))')
+    ? 'image-set(url("' + plateFile(p, w, "avif") + '") type("image/avif"), url("' + plateFile(p, w, "webp") + '") type("image/webp"))'
+    : "url(" + SRC[p] + ")"
+}
+
+/** An image for a plate's texture: a detached <picture> lets the browser pick AVIF, WebP or the JPEG. */
+export function plateImage(p: Plate) {
+  const w = plateWidth(), pic = document.createElement("picture"), im = new Image()
+  for (const ext of ["avif", "webp"]) {
+    const so = document.createElement("source")
+    so.type = "image/" + ext; so.srcset = plateFile(p, w, ext)
+    pic.appendChild(so)
+  }
+  im.decoding = "async"
+  pic.appendChild(im)
+  return im
+}
 const D = Math.PI / 180
 
 // Sun or moon painted into each plate (uv centre, radius in image-height units), removed before the live sky is drawn

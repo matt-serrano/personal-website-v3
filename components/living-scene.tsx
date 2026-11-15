@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react"
 import { buildMask } from "@/lib/elnido/masks"
 import { FS, VS } from "@/lib/elnido/shader"
-import { ASP, BAKED, LOOK, SRC, fmt, label, nowHour, posterPlate, sky, skyAt, skyPos, type Plate, type Zone } from "@/lib/elnido/sky"
+import { ASP, BAKED, LOOK, SRC, fmt, label, nowHour, plateImage, posterImage, posterPlate, sky, skyAt, skyPos, type Plate, type Zone } from "@/lib/elnido/sky"
 
 export type SceneStatus = { label: string; clock: string; mode: "live" | "elnido" | "preview" | "playing" }
 
@@ -71,7 +71,7 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
     }
 
     const s0 = skyAt(state.hour, zoneRef.current)
-    poster.style.backgroundImage = "url(" + SRC[posterPlate(s0)] + ")"
+    poster.style.backgroundImage = posterImage(posterPlate(s0))
 
     let disposed = false
     let raf = 0, running = false, bootRaf = 0, bootTimer = 0, slowTimer = 0
@@ -83,7 +83,7 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
     // Without WebGL the still photo is the scene, so it changes with the clock too
     function startUIOnly() {
       const h = state.live ? nowHour(zoneRef.current) : state.hour, s = skyAt(h, zoneRef.current)
-      poster.style.backgroundImage = "url(" + SRC[posterPlate(s)] + ")"
+      poster.style.backgroundImage = posterImage(posterPlate(s))
       report(h, label(s))
     }
     redrawRef.current = startUIOnly
@@ -126,9 +126,10 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
         if (textures[name]) return Promise.resolve()
         if (pending[name]) return pending[name]!
         pending[name] = new Promise(function (res) {
-          const im = new Image(); im.decoding = "async"
+          const im = plateImage(name)
           im.onload = function () { if (disposed) return res(); gl!.activeTexture(gl!.TEXTURE5); const tx = newTex(); gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGB, gl!.RGB, gl!.UNSIGNED_BYTE, im); textures[name] = tx; res() }
           im.onerror = function () { res() }
+          // Setting src last starts the load once the <picture> sources are in place
           im.src = SRC[name]
         })
         return pending[name]!
