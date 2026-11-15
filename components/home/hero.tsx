@@ -28,7 +28,7 @@ export function Hero() {
             <br />
             {left[1]}
           </p>
-          <p className="shade text-right">
+          <p className="masthead-place shade text-right">
             {right[0]}
             <br />
             {right[1]}

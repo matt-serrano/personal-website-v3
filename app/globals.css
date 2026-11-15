@@ -68,6 +68,8 @@
   --tone-label: rgba(255, 255, 255, 0.7);
   --tone-subtitle: rgba(255, 255, 255, 0.85);
   --shadow-text: 0 1px 2px rgba(0, 0, 0, 0.35);
+  /* For the two elements on the brightest parts of the photo (right caption, webring) */
+  --shadow-strong: 0 1px 3px rgba(0, 0, 0, 0.45);
   /* The photo and the scrims over it */
   --scene-filter: brightness(1.05) saturate(1.25) contrast(1.05);
   --scene-position: center 60%;
@@ -332,6 +334,13 @@
   font-size: var(--fs-caption); font-weight: var(--fw-caption); line-height: var(--lh-caption);
   letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--tone-caption);
 }
+/* TORONTO / ONTARIO has no scrim under it, so it is brighter, heavier and more shadowed than the left column */
+.masthead-caption .masthead-place { color: rgba(255, 255, 255, 0.95); font-weight: var(--fw-strong); text-shadow: var(--shadow-strong); }
+
+/* The webring sits on the brightest water: full white, heavier arrows, a stronger shadow */
+.webring .line-arrow path { stroke-width: 2; }
+.home .webring.on-scene svg, .home .webring.on-scene img { opacity: 1; filter: drop-shadow(var(--shadow-strong)); }
+
 @media (prefers-reduced-motion: no-preference) {
   .masthead-line > span { animation: masthead-rise 500ms cubic-bezier(0.16, 1, 0.3, 1) both; }
   .masthead-line + .masthead-line > span { animation-delay: 80ms; }
