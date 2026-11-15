@@ -258,6 +258,8 @@
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: var(--scrim-top), var(--scrim-left);
 }
+/* A barely-there shadow under the text only: a readability safeguard where a scrim is thin, not a glow */
+.home .on-scene { text-shadow: var(--shadow-text); }
 .home-hero { grid-area: hero; min-width: 0; }
 .home-panel { grid-area: panel; min-width: 0; }
 .home-place { grid-area: place; align-self: end; min-width: 0; }
@@ -320,7 +322,6 @@
     background: var(--scrim-left);
     mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
   }
-  .home .on-scene { text-shadow: none; }
   .home .on-scene svg, .home .on-scene img { filter: none; }
   /*
    * The masthead fills the column. "MATTHEW" is 3.5623em wide, so --fs-name fits it to the column,
