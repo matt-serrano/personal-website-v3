@@ -11,17 +11,17 @@ const titleTail = (t: string) => t.slice(t.lastIndexOf(" ") + 1)
 
 /**
  * The small-screen stand-in for the panel: every item at once, left-aligned in the centered column.
- * Spacing scales with screen height: full size on a tall iPad, tighter on a phone so the page still fits one screen.
+ * Spacing comes from the scale: 48px between sections, 16px under a label, 24px between items, 4px under a title.
  */
 export function StackedList() {
   return (
-    <div className="on-scene flex flex-col gap-[clamp(18px,calc(8svh-34px),52px)] text-left">
+    <div className="on-scene flex flex-col gap-(--space-48) text-left">
       {GROUPS.map((g) => (
         <section key={g.id} aria-labelledby={`list-${g.id}`}>
           <h2 id={`list-${g.id}`} className="type-label">
             {g.label}
           </h2>
-          <ul className="mt-[clamp(4px,calc(2svh-6px),14px)] flex flex-col gap-[clamp(6px,calc(4svh-20px),22px)]">
+          <ul className="mt-(--space-16) flex flex-col gap-(--space-24)">
             {g.items.map((item) => (
               <li key={item.title}>
                 <Item item={item} />
@@ -66,7 +66,7 @@ function Item({ item }: { item: PanelItem }) {
           item.title
         )}
       </h3>
-      <p className="home-item-line type-subtitle mt-1">
+      <p className="type-subtitle mt-(--space-4)">
         {item.line}
         {item.date ? <span className="whitespace-nowrap"> · {item.date}</span> : null}
       </p>
