@@ -98,7 +98,7 @@ export function Panel() {
             item.title
           )}
         </h2>
-        <p className="mt-2 text-[15px] font-medium">
+        <p className="type-subtitle mt-2">
           {item.line}
           {item.date ? (
             <>
@@ -107,7 +107,7 @@ export function Panel() {
             </>
           ) : null}
         </p>
-        <p className="mt-1.5 text-[14px] leading-relaxed text-white/85">{item.description}</p>
+        <p className="type-subtitle mt-1.5">{item.description}</p>
       </div>
 
       <div className="mt-3 flex items-center justify-between">

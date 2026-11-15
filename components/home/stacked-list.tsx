@@ -66,7 +66,7 @@ function Item({ item }: { item: PanelItem }) {
           item.title
         )}
       </h3>
-      <p className="home-item-line mt-1 text-[clamp(12px,calc(0.7svh+7px),15px)] leading-snug text-white/70">
+      <p className="home-item-line type-subtitle mt-1">
         {item.line}
         {item.date ? <span className="whitespace-nowrap"> · {item.date}</span> : null}
       </p>

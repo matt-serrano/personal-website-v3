@@ -227,6 +227,10 @@
     font-size: var(--fs-title); font-weight: var(--fw-strong); line-height: var(--lh-title);
     letter-spacing: var(--ls-title); color: var(--tone-text);
   }
+  .type-subtitle {
+    font-size: var(--fs-subtitle); font-weight: var(--fw-regular); line-height: var(--lh-subtitle);
+    color: var(--tone-subtitle);
+  }
 }
 
 /* ---------- home: one full-screen view ---------- */
