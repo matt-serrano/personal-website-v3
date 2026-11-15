@@ -306,8 +306,8 @@
 .home-list, .home-links { display: none; }
 
 /*
- * A soft, edgeless shade behind a small element that sits on the brightest part of the photo (the right-hand
- * caption over the sky, the webring over the water): reads as natural shadow, not a box.
+ * A soft, edgeless shade behind a small element that sits on the brightest part of the photo (the webring
+ * over the water): reads as natural shadow, not a box.
  */
 .shade { position: relative; }
 /*
@@ -334,8 +334,14 @@
   font-size: var(--fs-caption); font-weight: var(--fw-caption); line-height: var(--lh-caption);
   letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--tone-caption);
 }
-/* TORONTO / ONTARIO has no scrim under it, so it is brighter, heavier and more shadowed than the left column */
-.masthead-caption .masthead-place { color: rgba(255, 255, 255, 0.95); font-weight: var(--fw-strong); text-shadow: var(--shadow-strong); }
+/*
+ * TORONTO / ONTARIO has no scrim under it, so it is brighter, heavier and more shadowed than the left column.
+ * A tight halo that follows the letterforms darkens only right behind the lettering, never a patch of sky.
+ */
+.masthead-caption .masthead-place {
+  color: rgba(255, 255, 255, 0.95); font-weight: var(--fw-strong);
+  text-shadow: var(--shadow-strong), 0 0 0.5em rgba(0, 0, 0, 0.35);
+}
 
 /* The webring sits on the brightest water: full white, heavier arrows, a stronger shadow */
 .webring .line-arrow path { stroke-width: 2; }
