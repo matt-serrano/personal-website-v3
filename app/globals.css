@@ -70,7 +70,13 @@
   /* The photo and the scrims over it */
   --scene-filter: brightness(1.05) saturate(1.25) contrast(1.05);
   --scene-position: center 60%;
-  --scrim-left: linear-gradient(to right, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.28) 40%, rgba(0, 0, 0, 0) 62%);
+  /*
+   * Measured, not guessed: these are the lightest scrims that keep every line of text at WCAG AA (4.5:1)
+   * over the brightest water and the noon sky, at every plate. On desktop the name and location label
+   * sit on the left and the panel on the right, so each side is shaded and the middle of the scene is not.
+   */
+  --scrim-left: linear-gradient(to right, rgba(0, 0, 0, 0.65) 0, rgba(0, 0, 0, 0.6) 560px, rgba(0, 0, 0, 0) 900px);
+  --scrim-right: linear-gradient(to left, rgba(0, 0, 0, 0.65) 0, rgba(0, 0, 0, 0.65) 400px, rgba(0, 0, 0, 0) 680px);
   --scrim-top: linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0) 20%);
   /* Icons and tap targets */
   --icon-size: 22px;
@@ -98,6 +104,10 @@
 /* Small screens (phones and portrait tablets, the same query as the centered layout) */
 @media (max-width: 1023px), (max-width: 1200px) and (orientation: portrait) {
   :root {
+    /* The column spans the screen, so the scrim holds across it, darker at the left where the text starts */
+    --scrim-left: linear-gradient(to right, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.6) 70%, rgba(0, 0, 0, 0.5) 100%);
+    /* Extra shade over the masthead, where the right-aligned caption meets the brightest sky */
+    --scrim-masthead: linear-gradient(to bottom, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0.25) 360px, rgba(0, 0, 0, 0) 480px);
     --fs-name: clamp(56px, 16vw, 96px);
     --fs-caption: 12px;
     --fs-label: 12px;
@@ -272,12 +282,12 @@
     calc(clamp(20px, 3.4vw, 48px) + env(safe-area-inset-left, 0px));
 }
 /*
- * Shade only where text sits: a light band along the top (status bar, name) and the left of the photo,
- * where the text starts. The rest of the scene shows at full colour.
+ * Shade only where text sits: a light band along the top (status bar, name), the left of the photo under
+ * the name and location, and the right under the panel. The middle of the scene shows at full colour.
  */
 .home::before {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: var(--scrim-top), var(--scrim-left);
+  background: var(--scrim-top), var(--scrim-right), var(--scrim-left);
 }
 /* A barely-there shadow under the text only: a readability safeguard where a scrim is thin, not a glow */
 .home .on-scene { text-shadow: var(--shadow-text); }
@@ -339,7 +349,7 @@
   .home::after {
     content: ""; grid-row: 1 / 4; grid-column: 1; justify-self: center; width: 100vw;
     margin-top: calc(-1 * var(--pad-top)); z-index: -1; pointer-events: none;
-    background: var(--scrim-left);
+    background: var(--scrim-masthead), var(--scrim-left);
     mask-image: linear-gradient(to bottom, #000 calc(100% - var(--space-32)), transparent);
   }
   .home .on-scene svg, .home .on-scene img { filter: none; }
