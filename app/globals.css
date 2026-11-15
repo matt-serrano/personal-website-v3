@@ -234,6 +234,11 @@
     calc(clamp(16px, 2.6vw, 36px) + env(safe-area-inset-bottom, 0px))
     calc(clamp(20px, 3.4vw, 48px) + env(safe-area-inset-left, 0px));
 }
+/* Shade only the left of the photo, where the text starts; the right of the scene shows at full colour */
+.home::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--scrim-left);
+}
 .home-hero { grid-area: hero; min-width: 0; }
 .home-panel { grid-area: panel; min-width: 0; }
 .home-place { grid-area: place; align-self: end; min-width: 0; }
@@ -283,11 +288,6 @@
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     padding-left: calc(16px + env(safe-area-inset-left, 0px));
     padding-right: calc(16px + env(safe-area-inset-right, 0px));
-  }
-  /* A scrim sits behind the column, so text needs no shadow to stay legible */
-  .home::before {
-    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.58) 25%, rgba(0, 0, 0, 0.58) 85%, rgba(0, 0, 0, 0.3) 100%);
   }
   .home .on-scene { text-shadow: none; }
   /* 80% is the least that clears 4.5:1 at the top of the scrim */
