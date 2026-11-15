@@ -231,6 +231,12 @@
     font-size: var(--fs-subtitle); font-weight: var(--fw-regular); line-height: var(--lh-subtitle);
     color: var(--tone-subtitle);
   }
+  /* An icon-only link or button: the icon centred in a full tap target */
+  .icon-tap {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: var(--tap-size); height: var(--tap-size);
+  }
+  .icon-tap svg { width: var(--icon-size); height: var(--icon-size); }
 }
 
 /* ---------- home: one full-screen view ---------- */

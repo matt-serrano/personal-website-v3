@@ -58,13 +58,12 @@ export function HeroLinks({ className, iconOnly = false, children }: HeroLinksPr
               aria-label={external ? `${link.label} (opens in a new tab)` : `${link.label}: ${link.text}`}
               title={iconOnly ? link.label : undefined}
               className={cn(
-                "inline-flex min-h-11 items-center",
                 iconOnly
-                  ? "min-w-11 justify-center opacity-90 hover:opacity-100"
-                  : "gap-2 px-1 text-[13px] font-semibold uppercase tracking-[0.1em] underline-offset-[5px] hover:underline",
+                  ? "icon-tap opacity-90 hover:opacity-100"
+                  : "inline-flex min-h-11 items-center gap-2 px-1 text-[13px] font-semibold uppercase tracking-[0.1em] underline-offset-[5px] hover:underline",
               )}
             >
-              <LinkIcon name={link.icon} size={iconOnly ? 20 : 15} />
+              <LinkIcon name={link.icon} size={iconOnly ? 22 : 15} />
               {iconOnly ? null : link.label}
             </a>
           </li>

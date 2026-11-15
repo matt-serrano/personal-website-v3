@@ -19,9 +19,9 @@ export function TimeToggle({ zone, onZoneChange }: Props) {
       aria-label={label}
       title={label}
       onClick={() => onZoneChange(elnido ? "local" : "elnido")}
-      className="inline-flex min-h-11 min-w-11 items-center justify-center opacity-90 hover:opacity-100"
+      className="icon-tap opacity-90 hover:opacity-100"
     >
-      <LinkIcon name="clock" size={20} />
+      <LinkIcon name="clock" size={22} />
     </button>
   )
 }
