@@ -67,7 +67,7 @@ export function Panel() {
         })}
       </div>
 
-      <div id="panel-item" role="tabpanel" aria-labelledby={`tab-${group.id}`} className="mt-3 min-h-[184px]">
+      <div id="panel-item" role="tabpanel" aria-labelledby={`tab-${group.id}`} className="mt-3 min-h-[11.5rem]">
         <p aria-live="polite" aria-atomic="true" className="type-label text-white tabular-nums">
           <span aria-hidden="true">
             {pad(i + 1)} / {pad(total)}
@@ -78,18 +78,16 @@ export function Panel() {
         </p>
         <h2 className="type-title mt-2">
           {item.href ? (
-            <a href={item.href} target="_blank" rel="noreferrer" className="underline-offset-[6px] decoration-1 hover:underline">
+            <a href={item.href} target="_blank" rel="noreferrer" className="underline-offset-[0.375rem] decoration-1 hover:underline">
               {titleHead(item.title)}
               {/* The last word and the icon stay together so the icon never wraps onto a line alone */}
               <span className="whitespace-nowrap">
                 {titleTail(item.title)}
                 <ArrowUpRight
-                  width={20}
-                  height={20}
                   strokeWidth={1.75}
                   aria-hidden="true"
                   focusable="false"
-                  className="ml-1 inline-block align-[0.1em] opacity-80"
+                  className="ml-1 inline-block size-5 align-[0.1em] opacity-80"
                 />
               </span>
               <span className="sr-only"> (opens in a new tab)</span>
@@ -115,7 +113,7 @@ export function Panel() {
           {group.items.map((it, n) => (
             <span
               key={it.title}
-              className={cn("h-[3px] bg-white motion-safe:transition-all", n === i ? "w-[18px]" : "w-[6px] opacity-60")}
+              className={cn("h-[0.1875rem] bg-white motion-safe:transition-all", n === i ? "w-[1.125rem]" : "w-[0.375rem] opacity-60")}
             />
           ))}
         </div>

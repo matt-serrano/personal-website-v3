@@ -60,7 +60,7 @@ export function HeroLinks({ className, iconOnly = false, children }: HeroLinksPr
               className={cn(
                 iconOnly
                   ? "icon-tap opacity-90 hover:opacity-100"
-                  : "type-label inline-flex min-h-11 items-center gap-2 px-1 text-white underline-offset-[5px] hover:underline",
+                  : "type-label inline-flex min-h-11 items-center gap-2 px-1 text-white underline-offset-[0.3125rem] hover:underline",
               )}
             >
               <LinkIcon name={link.icon} size={iconOnly ? 22 : 15} />

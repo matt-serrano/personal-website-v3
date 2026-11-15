@@ -45,19 +45,17 @@ function Item({ item }: { item: PanelItem }) {
             target="_blank"
             rel="noreferrer"
             // The ::after pads the hit area to 44px tall without moving anything
-            className="relative inline-block underline-offset-4 decoration-1 after:absolute after:-inset-x-1 after:-inset-y-[13px] after:content-[''] hover:underline"
+            className="relative inline-block underline-offset-4 decoration-1 after:absolute after:-inset-x-1 after:-inset-y-[0.8125rem] after:content-[''] hover:underline"
           >
             {titleHead(item.title)}
             {/* The last word and the arrow stay together, so a wrapped title keeps its arrow beside it */}
             <span className="whitespace-nowrap">
               {titleTail(item.title)}
               <ArrowUpRight
-                width={16}
-                height={16}
                 strokeWidth={2}
                 aria-hidden="true"
                 focusable="false"
-                className="ml-1.5 inline-block align-[-0.1em] opacity-80"
+                className="ml-1.5 inline-block size-4 align-[-0.1em] opacity-80"
               />
             </span>
             <span className="sr-only"> (opens in a new tab)</span>

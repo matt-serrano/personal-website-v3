@@ -42,12 +42,13 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* ---------- home design tokens (desktop values; small screens override below) ---------- */
+  /* Every size is in rem, so the whole home page scales with the root font size (16px = the design values) */
   /* Type sizes */
-  --fs-name: clamp(64px, 10vw, 128px);
-  --fs-caption: 13px;
-  --fs-label: 13px;
-  --fs-title: 22px;
-  --fs-subtitle: 16px;
+  --fs-name: clamp(4rem, 10vw, 8rem);
+  --fs-caption: 0.8125rem;
+  --fs-label: 0.8125rem;
+  --fs-title: 1.375rem;
+  --fs-subtitle: 1rem;
   /* Body-font weights */
   --fw-regular: 400;
   --fw-caption: 500;
@@ -74,19 +75,22 @@
   --scrim-left: linear-gradient(to right, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0) 62%);
   --scrim-top: linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0) 20%);
   /* Icons and tap targets */
-  --icon-size: 22px;
-  --tap-size: 44px;
+  --icon-size: 1.375rem;
+  --tap-size: 2.75rem;
+  /* The webring's line arrows: 30 x 10 at the 16px base */
+  --arrow-width: 1.875rem;
+  --arrow-height: 0.625rem;
   /* Spacing scale: every gap and margin on the small-screen layout is one of these */
-  --space-4: 4px;
-  --space-8: 8px;
-  --space-12: 12px;
-  --space-16: 16px;
-  --space-24: 24px;
-  --space-32: 32px;
-  --space-48: 48px;
-  --space-64: 64px;
+  --space-4: 0.25rem;
+  --space-8: 0.5rem;
+  --space-12: 0.75rem;
+  --space-16: 1rem;
+  --space-24: 1.5rem;
+  --space-32: 2rem;
+  --space-48: 3rem;
+  --space-64: 4rem;
   /* Small-screen container: one column, gutters included, centered */
-  --container: 560px;
+  --container: 35rem;
   --gutter: var(--space-24);
   --pad-top: calc(var(--space-64) + env(safe-area-inset-top, 0px));
   --pad-bottom: calc(var(--space-32) + env(safe-area-inset-bottom, 0px));
@@ -99,11 +103,11 @@
 /* Small screens (phones and portrait tablets, the same query as the centered layout) */
 @media (max-width: 1023px), (max-width: 1200px) and (orientation: portrait) {
   :root {
-    --fs-name: clamp(56px, 16vw, 96px);
-    --fs-caption: 12px;
-    --fs-label: 12px;
-    --fs-title: 19px;
-    --fs-subtitle: 15px;
+    --fs-name: clamp(3.5rem, 16vw, 6rem);
+    --fs-caption: 0.75rem;
+    --fs-label: 0.75rem;
+    --fs-title: 1.1875rem;
+    --fs-subtitle: 0.9375rem;
   }
 }
 
@@ -259,18 +263,18 @@
 .home {
   min-height: 100svh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  grid-template-rows: auto minmax(24px, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  grid-template-rows: auto minmax(1.5rem, 1fr) auto;
   grid-template-areas:
     "hero  panel"
     ".     ."
     "place ring";
-  column-gap: clamp(24px, 4vw, 64px);
+  column-gap: clamp(1.5rem, 4vw, 4rem);
   padding:
-    calc(clamp(20px, 3.4vw, 48px) + env(safe-area-inset-top, 0px))
-    calc(clamp(20px, 3.4vw, 48px) + env(safe-area-inset-right, 0px))
-    calc(clamp(16px, 2.6vw, 36px) + env(safe-area-inset-bottom, 0px))
-    calc(clamp(20px, 3.4vw, 48px) + env(safe-area-inset-left, 0px));
+    calc(clamp(1.25rem, 3.4vw, 3rem) + env(safe-area-inset-top, 0px))
+    calc(clamp(1.25rem, 3.4vw, 3rem) + env(safe-area-inset-right, 0px))
+    calc(clamp(1rem, 2.6vw, 2.25rem) + env(safe-area-inset-bottom, 0px))
+    calc(clamp(1.25rem, 3.4vw, 3rem) + env(safe-area-inset-left, 0px));
 }
 /*
  * Shade only where text sits: a light band along the top (status bar, name) and the left of the photo,
@@ -288,6 +292,9 @@
 .home-ring { grid-area: ring; align-self: end; justify-self: end; }
 
 .home-list, .home-links { display: none; }
+
+/* Line arrows take their size from the tokens, so they scale with the rest of the page */
+.line-arrow { width: var(--arrow-width); height: var(--arrow-height); }
 
 /* ---------- masthead: name, hairline, caption ---------- */
 .masthead { width: fit-content; }
@@ -314,7 +321,7 @@
 /*
  * Phones and portrait tablets (iPad Pro included): one centered column, the whole list shown instead
  * of the panel. Landscape tablets and laptops keep the desktop layout.
- * Everything sits inside one container (560px, gutters included) and its gutter; nothing crosses it.
+ * Everything sits inside one container (35rem, gutters included) and its gutter; nothing crosses it.
  */
 @media (max-width: 1023px), (max-width: 1200px) and (orientation: portrait) {
   .home {
@@ -346,21 +353,21 @@
   .home .on-scene svg, .home .on-scene img { filter: none; }
   /* The name takes about two thirds of the column; the rule and caption span it gutter to gutter */
   .masthead { width: auto; }
-  /* Keeps the lines' clip margins inside the name, so it sits exactly 64px down and 16px above the rule */
+  /* Keeps the lines' clip margins inside the name, so it sits exactly at the top padding and --space-16 above the rule */
   .masthead-name { display: flow-root; }
   .home-wide, .home-panel, .home-place { display: none; }
   .home-list { display: block; grid-area: list; min-width: 0; }
   /*
    * One icon row inside the gutter: socials and the clock on the left, the webring on the right. The tap
    * targets reach into the gutter so the visible glyphs line up with it: the first icon's edge on the left,
-   * the last arrow's tip (30px wide) on the right.
+   * the last arrow's tip on the right.
    */
   .home-links {
     display: block; grid-area: foot; justify-self: start;
     margin-left: calc((var(--icon-size) - var(--tap-size)) / 2);
     --icon-gap: var(--space-16);
   }
-  .home-ring { grid-area: foot; justify-self: end; align-self: center; margin-right: calc((30px - var(--tap-size)) / 2); }
+  .home-ring { grid-area: foot; justify-self: end; align-self: center; margin-right: calc((var(--arrow-width) - var(--tap-size)) / 2); }
   .webring-logo { opacity: 1; }
 }
 

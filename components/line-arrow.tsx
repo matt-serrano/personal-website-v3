@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 
 type Props = { direction?: "left" | "right"; className?: string }
 
-/** Thin 30×10 line arrow with a sharp head. Nudges 5px in its direction when a parent `.group` is hovered. */
+/** Thin line arrow with a sharp head, 30×10 at the 16px base. Nudges in its direction when a parent `.group` is hovered. */
 export function LineArrow({ direction = "right", className }: Props) {
   return (
     <svg
@@ -13,8 +13,8 @@ export function LineArrow({ direction = "right", className }: Props) {
       aria-hidden="true"
       focusable="false"
       className={cn(
-        "shrink-0 motion-safe:transition-transform motion-safe:duration-200",
-        direction === "left" ? "-scale-x-100 group-hover:-translate-x-[5px]" : "group-hover:translate-x-[5px]",
+        "line-arrow shrink-0 motion-safe:transition-transform motion-safe:duration-200",
+        direction === "left" ? "-scale-x-100 group-hover:-translate-x-[0.3125rem]" : "group-hover:translate-x-[0.3125rem]",
         className,
       )}
     >
