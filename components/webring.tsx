@@ -13,7 +13,7 @@ export function Webring() {
   const host = useSyncExternalStore(noSubscribe, getHost, getServerHost)
 
   return (
-    <nav id="otu-webring" aria-label="OTU webring" className="on-scene flex items-center">
+    <nav id="otu-webring" aria-label="OTU webring" className="shade on-scene flex items-center">
       <a id="webring-prev" href={webring.prev(host)} aria-label="Previous site in the OTU webring" title="Previous site in the OTU webring" className="group grid h-11 w-11 place-items-center">
         <LineArrow direction="left" />
       </a>

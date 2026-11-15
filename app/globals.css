@@ -294,12 +294,28 @@
 }
 /* A barely-there shadow under the text only: a readability safeguard where a scrim is thin, not a glow */
 .home .on-scene { text-shadow: var(--shadow-text); }
+/* The shades behind the webring and caption may reach past the screen edge; never let that scroll sideways */
+.home { overflow-x: clip; }
 .home-hero { grid-area: hero; min-width: 0; }
 .home-panel { grid-area: panel; min-width: 0; }
 .home-place { grid-area: place; align-self: end; min-width: 0; }
 .home-ring { grid-area: ring; align-self: end; justify-self: end; }
 
 .home-list, .home-links { display: none; }
+
+/*
+ * A soft, edgeless shade behind a small element that sits on the brightest part of the photo (the right-hand
+ * caption over the sky, the webring over the water): reads as natural shadow, not a box.
+ */
+.shade { position: relative; }
+/*
+ * closest-side keeps the whole fade inside the box, so it never meets an edge; the 3rem box puts the
+ * 75% fade-out about 1.75rem (28px at the base) past the element.
+ */
+.shade::before {
+  content: ""; position: absolute; inset: -3rem; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse closest-side at center, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.12) 50%, transparent 75%);
+}
 
 /* Line arrows take their size from the tokens, so they scale with the rest of the page */
 .line-arrow { width: var(--arrow-width); height: var(--arrow-height); }
