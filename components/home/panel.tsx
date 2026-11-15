@@ -68,7 +68,7 @@ export function Panel() {
       </div>
 
       <div id="panel-item" role="tabpanel" aria-labelledby={`tab-${group.id}`} className="mt-3 min-h-[184px]">
-        <p aria-live="polite" aria-atomic="true" className="text-[12px] font-semibold tracking-[0.14em] tabular-nums">
+        <p aria-live="polite" aria-atomic="true" className="type-label text-white tabular-nums">
           <span aria-hidden="true">
             {pad(i + 1)} / {pad(total)}
           </span>

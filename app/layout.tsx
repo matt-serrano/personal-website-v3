@@ -7,7 +7,7 @@ import { THEME } from "@/lib/elnido/sky"
 import "./globals.css"
 
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" })
-const archivo = Archivo({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-archivo" })
+const archivo = Archivo({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-archivo" })
 
 export const metadata: Metadata = {
   title: "Matthew Serrano",

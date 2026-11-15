@@ -19,7 +19,7 @@ export function LocationLabel({ status, zone, onZoneChange }: Props) {
     <div className="on-scene">
       <div className="flex items-center gap-2">
         <LinkIcon name="pin" />
-        <p className="text-[15px] font-semibold">{place.name}</p>
+        <p className="text-(length:--fs-subtitle) font-(--fw-strong)">{place.name}</p>
         {locations.length > 1 ? (
           <button
             // Form-fill extensions stamp attributes like fdprocessedid onto buttons before hydration
@@ -33,7 +33,7 @@ export function LocationLabel({ status, zone, onZoneChange }: Props) {
           </button>
         ) : null}
       </div>
-      <p className="mt-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-white/80 tabular-nums">
+      <p className="type-label mt-1 text-(--tone-caption) tabular-nums">
         {status ? (
           <>
             {status.label} ·{" "}
@@ -62,14 +62,14 @@ function ZoneSwitch({ zone, onZoneChange }: Omit<Props, "status">) {
       type="button"
       onClick={() => onZoneChange(next)}
       aria-label={`${current}. ${hint}`}
-      className="group relative -my-3 inline-block py-3 uppercase tracking-[0.12em] outline-none"
+      className="group relative -my-3 inline-block py-3 uppercase tracking-(--ls-caps) outline-none"
     >
       <span className="underline decoration-white/40 decoration-dotted underline-offset-4 transition-colors group-hover:text-white group-hover:decoration-white group-hover:decoration-solid group-focus-visible:text-white group-focus-visible:decoration-white group-focus-visible:decoration-solid">
         {current}
       </span>
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-full left-0 -mb-1 translate-y-1 whitespace-nowrap rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold normal-case tracking-normal text-white opacity-0 backdrop-blur-sm transition duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
+        className="pointer-events-none absolute bottom-full left-0 -mb-1 translate-y-1 whitespace-nowrap rounded-full bg-black/55 px-2.5 py-1 text-(length:--fs-label) font-(--fw-strong) normal-case tracking-normal text-white opacity-0 backdrop-blur-sm transition duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
       >
         {hint}
       </span>
