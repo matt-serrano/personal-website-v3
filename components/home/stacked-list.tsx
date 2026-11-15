@@ -38,7 +38,7 @@ export function StackedList() {
 function Item({ item }: { item: PanelItem }) {
   return (
     <>
-      <h3 className="text-[clamp(15px,calc(1.6svh+4.5px),21px)] font-semibold leading-tight">
+      <h3 className="type-title">
         {item.href ? (
           <a
             href={item.href}

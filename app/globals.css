@@ -223,6 +223,10 @@
     font-size: var(--fs-label); font-weight: var(--fw-strong); letter-spacing: var(--ls-caps);
     text-transform: uppercase; color: var(--tone-label);
   }
+  .type-title {
+    font-size: var(--fs-title); font-weight: var(--fw-strong); line-height: var(--lh-title);
+    letter-spacing: var(--ls-title); color: var(--tone-text);
+  }
 }
 
 /* ---------- home: one full-screen view ---------- */

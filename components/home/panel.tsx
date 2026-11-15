@@ -76,8 +76,7 @@ export function Panel() {
             {group.label} {i + 1} of {total}: {item.title}
           </span>
         </p>
-        {/* Linked titles get looser leading so a hover underline on a wrapped first line clears the second */}
-        <h2 className={cn("mt-2 text-[24px] font-semibold", item.href ? "leading-[1.3]" : "leading-[1.15]")}>
+        <h2 className="type-title mt-2">
           {item.href ? (
             <a href={item.href} target="_blank" rel="noreferrer" className="underline-offset-[6px] decoration-1 hover:underline">
               {titleHead(item.title)}
