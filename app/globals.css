@@ -70,7 +70,7 @@
   /* The photo and the scrims over it */
   --scene-filter: brightness(1.05) saturate(1.25) contrast(1.05);
   --scene-position: center 60%;
-  --scrim-left: linear-gradient(to right, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0) 62%);
+  --scrim-left: linear-gradient(to right, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.28) 40%, rgba(0, 0, 0, 0) 62%);
   --scrim-top: linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0) 20%);
   /* Icons and tap targets */
   --icon-size: 22px;
