@@ -251,7 +251,7 @@
 
 /* ---------- masthead: name, hairline, caption ---------- */
 .masthead { width: fit-content; }
-.masthead-name { font-size: clamp(64px, 10vw, 156px); line-height: 0.85; letter-spacing: -0.01em; }
+.masthead-name { font-size: var(--fs-name); line-height: var(--lh-name); letter-spacing: var(--ls-name); }
 /* Each line clips its own rise; the padding keeps the clip clear of the glyphs at this tight line-height */
 .masthead-line { display: block; overflow: hidden; padding-block: 0.08em; margin-block: -0.08em; }
 .masthead-line > span { display: block; }
@@ -310,12 +310,10 @@
   .masthead-caption { color: rgba(255, 255, 255, 0.8); }
   .home .on-scene svg, .home .on-scene img { filter: none; }
   /*
-   * The masthead fills the column. "MATTHEW" is 3.5623em wide, so it spans the column exactly when the
-   * screen is tall enough (iPad); on phones it is capped by height so the page still fits one screen,
-   * and the rule and caption keep the full column width the caption needs.
+   * The masthead fills the column. "MATTHEW" is 3.5623em wide, so --fs-name fits it to the column,
+   * up to 88px on phones and 128px on tablets; the rule and caption keep the full column width.
    */
   .masthead { container-type: inline-size; width: auto; }
-  .masthead-name { font-size: max(32px, min(100cqw / 3.5623, calc(8svh - 6px))); }
   .masthead-rule { margin-top: clamp(8px, calc(1.8svh - 4px), 16px); }
   .masthead-caption { margin-top: clamp(6px, calc(1.4svh - 3px), 12px); }
   .home-wide, .home-panel, .home-place { display: none; }
