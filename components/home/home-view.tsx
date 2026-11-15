@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useLayoutEffect, useState } from "react"
 import { LivingScene, type SceneStatus } from "@/components/living-scene"
 import { Hero, HeroLinks } from "@/components/home/hero"
 import { LocationLabel } from "@/components/home/location-label"
@@ -9,6 +9,7 @@ import { StackedList } from "@/components/home/stacked-list"
 import { TimeToggle } from "@/components/home/time-toggle"
 import { Webring } from "@/components/webring"
 import type { Zone } from "@/lib/elnido/sky"
+import { fitHome, resetHomeFit } from "@/lib/home-fit"
 
 /**
  * One full-screen view: the living scene behind, everything else laid straight on it.
@@ -19,6 +20,17 @@ import type { Zone } from "@/lib/elnido/sky"
 export function HomeView() {
   const [status, setStatus] = useState<SceneStatus | null>(null)
   const [zone, setZone] = useState<Zone>("local")
+
+  // Scale the page to the visible height before it paints, and again whenever the window changes size
+  useLayoutEffect(() => {
+    fitHome()
+    const refit = () => fitHome()
+    window.addEventListener("resize", refit)
+    return () => {
+      window.removeEventListener("resize", refit)
+      resetHomeFit()
+    }
+  }, [])
 
   return (
     <>

@@ -195,14 +195,12 @@
     color-scheme: dark;
   }
   /*
-   * The home page scales as one: every size on it is in rem, and the root follows the smaller of the
-   * screen's width and height, so the phone layout keeps its proportions and always fits one screen.
-   * The phone column is about 62rem tall, so the root may be at most 1.61svh; 1.58 leaves ~2% to spare.
-   * The 10px floor is what a 375x667 iPhone SE needs (10.5px); 11px would push the icon row off-screen.
-   * Inner pages keep the browser's root size.
+   * The home page scales as one: every size on it is in rem, rendered at this 16px base. lib/home-fit.ts
+   * measures the page against the visible height and shrinks the root (inline on <html>) by exactly the
+   * overflow, so it always fits one screen in any browser. Inner pages keep the browser's root size.
    */
   html:has(.home) {
-    font-size: clamp(10px, min(4.1vw, 1.58svh), 18px);
+    font-size: 16px;
   }
   body {
     background: var(--ground);
@@ -338,8 +336,8 @@
     grid-template-columns: minmax(0, calc(var(--container) - 2 * var(--gutter)));
     grid-template-rows: auto auto auto;
     grid-template-areas: "hero" "list" "foot";
-    /* Exactly one screen: the fluid root scales the whole column to fit, so nothing scrolls or squeezes */
-    height: 100svh;
+    /* Exactly one screen: the measured visible height (100svh until measured); the fit scales the column into it */
+    height: var(--fit-h, 100svh);
     overflow: hidden;
     justify-content: center;
     align-content: start;
@@ -381,6 +379,9 @@
   .home-ring { grid-area: foot; justify-self: end; align-self: center; margin-right: calc((var(--arrow-width) - var(--tap-size)) / 2); }
   .webring-logo { opacity: 1; }
 }
+
+/* Lifted for a moment while lib/home-fit.ts measures the page's natural height */
+.home.home-measure { height: auto !important; min-height: 0 !important; }
 
 /* Narrow phones: tighter icon gaps, so the icons and the webring keep one row with clear space between them */
 @media (max-width: 409px) {
