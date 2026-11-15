@@ -18,7 +18,7 @@ export function StackedList() {
     <div className="on-scene flex flex-col gap-[clamp(18px,calc(8svh-34px),52px)] text-left">
       {GROUPS.map((g) => (
         <section key={g.id} aria-labelledby={`list-${g.id}`}>
-          <h2 id={`list-${g.id}`} className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+          <h2 id={`list-${g.id}`} className="type-label">
             {g.label}
           </h2>
           <ul className="mt-[clamp(4px,calc(2svh-6px),14px)] flex flex-col gap-[clamp(6px,calc(4svh-20px),22px)]">

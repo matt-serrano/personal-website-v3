@@ -56,9 +56,9 @@ export function Panel() {
               tabIndex={selected ? 0 : -1}
               onClick={() => jumpTo(n)}
               className={cn(
-                "relative min-h-11 flex-1 text-center text-[12px] font-semibold uppercase tracking-[0.14em]",
+                "type-label relative min-h-11 flex-1 text-center",
                 "after:absolute after:inset-x-0 after:bottom-2 after:h-[2px] after:bg-white after:content-['']",
-                selected ? "text-white" : "text-white/72 after:opacity-0 hover:text-white",
+                selected ? "text-white" : "after:opacity-0 hover:text-white",
               )}
             >
               {g.label}
