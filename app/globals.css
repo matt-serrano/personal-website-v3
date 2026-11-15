@@ -88,15 +88,12 @@
 /* Small screens (phones and portrait tablets, the same query as the centered layout) */
 @media (max-width: 1023px), (max-width: 1200px) and (orientation: portrait) {
   :root {
-    --fs-name: min(100cqw / 3.5623, 88px);
+    --fs-name: clamp(56px, 16vw, 96px);
     --fs-caption: 12px;
     --fs-label: 12px;
     --fs-title: 19px;
     --fs-subtitle: 15px;
   }
-}
-@media (min-width: 600px) and (max-width: 1023px), (min-width: 600px) and (max-width: 1200px) and (orientation: portrait) {
-  :root { --fs-name: min(100cqw / 3.5623, 128px); }
 }
 
 .dark {
@@ -336,11 +333,8 @@
     mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
   }
   .home .on-scene svg, .home .on-scene img { filter: none; }
-  /*
-   * The masthead fills the column. "MATTHEW" is 3.5623em wide, so --fs-name fits it to the column,
-   * up to 88px on phones and 128px on tablets; the rule and caption keep the full column width.
-   */
-  .masthead { container-type: inline-size; width: auto; }
+  /* The name takes about two thirds of the column; the rule and caption span it gutter to gutter */
+  .masthead { width: auto; }
   .masthead-rule { margin-top: clamp(8px, calc(1.8svh - 4px), 16px); }
   .masthead-caption { margin-top: clamp(6px, calc(1.4svh - 3px), 12px); }
   .home-wide, .home-panel, .home-place { display: none; }
