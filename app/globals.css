@@ -382,6 +382,8 @@
 
 /* Lifted for a moment while lib/home-fit.ts measures the page's natural height */
 .home.home-measure { height: auto !important; min-height: 0 !important; }
+/* Hidden until the first fit, so the unscaled page never flashes; the scene behind still shows */
+.fit-pending .home { visibility: hidden; }
 
 /* Narrow phones: tighter icon gaps, so the icons and the webring keep one row with clear space between them */
 @media (max-width: 409px) {

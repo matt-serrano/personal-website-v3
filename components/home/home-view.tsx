@@ -9,7 +9,7 @@ import { StackedList } from "@/components/home/stacked-list"
 import { TimeToggle } from "@/components/home/time-toggle"
 import { Webring } from "@/components/webring"
 import type { Zone } from "@/lib/elnido/sky"
-import { fitHome, resetHomeFit } from "@/lib/home-fit"
+import { installHomeFit, resetHomeFit } from "@/lib/home-fit"
 
 /**
  * One full-screen view: the living scene behind, everything else laid straight on it.
@@ -21,15 +21,10 @@ export function HomeView() {
   const [status, setStatus] = useState<SceneStatus | null>(null)
   const [zone, setZone] = useState<Zone>("local")
 
-  // Scale the page to the visible height before it paints, and again whenever the window changes size
+  // The <head> script fits the first load before paint; this covers arriving here by client-side navigation
   useLayoutEffect(() => {
-    fitHome()
-    const refit = () => fitHome()
-    window.addEventListener("resize", refit)
-    return () => {
-      window.removeEventListener("resize", refit)
-      resetHomeFit()
-    }
+    installHomeFit()
+    return resetHomeFit
   }, [])
 
   return (

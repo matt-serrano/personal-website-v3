@@ -4,6 +4,7 @@ import { Anton, Archivo } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { POSTER_SCRIPT } from "@/lib/elnido/poster-script"
 import { THEME } from "@/lib/elnido/sky"
+import { HOME_FIT_SCRIPT } from "@/lib/home-fit"
 import "./globals.css"
 
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" })
@@ -30,6 +31,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: POSTER_SCRIPT }} />
+        {/* Fits the home page to the visible height before it first paints (a no-op on other pages) */}
+        <script dangerouslySetInnerHTML={{ __html: HOME_FIT_SCRIPT }} />
       </head>
       <body className={`${anton.variable} ${archivo.variable} font-sans antialiased`}>
         {children}
