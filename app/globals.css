@@ -349,10 +349,26 @@
   .masthead-name { display: flow-root; }
   .home-wide, .home-panel, .home-place { display: none; }
   .home-list { display: block; grid-area: list; min-width: 0; }
-  /* Icons and webring share one footer row: icons on the left gutter, webring arrows on the right */
-  .home-links { display: block; grid-area: foot; justify-self: start; margin-left: -12px; }
-  .home-ring { grid-area: foot; justify-self: end; align-self: center; margin-right: -7px; }
+  /*
+   * One icon row inside the gutter: socials and the clock on the left, the webring on the right. The tap
+   * targets reach into the gutter so the visible glyphs line up with it: the first icon's edge on the left,
+   * the last arrow's tip (30px wide) on the right.
+   */
+  .home-links {
+    display: block; grid-area: foot; justify-self: start;
+    margin-left: calc((var(--icon-size) - var(--tap-size)) / 2);
+    --icon-gap: var(--space-16);
+  }
+  .home-ring { grid-area: foot; justify-self: end; align-self: center; margin-right: calc((30px - var(--tap-size)) / 2); }
   .webring-logo { opacity: 1; }
+}
+
+/* Narrow phones: tighter icon gaps, so the icons and the webring keep one row with clear space between them */
+@media (max-width: 409px) {
+  .home-links { --icon-gap: var(--space-8); }
+}
+@media (max-width: 374px) {
+  .home-links { --icon-gap: var(--space-4); }
 }
 
 /* ---------- inner pages: the matching still, darkened ---------- */

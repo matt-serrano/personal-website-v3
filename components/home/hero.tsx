@@ -46,7 +46,7 @@ type HeroLinksProps = { className?: string; iconOnly?: boolean; children?: React
 /** Social links; `iconOnly` drops the labels (screen readers still get them), `children` adds trailing items. */
 export function HeroLinks({ className, iconOnly = false, children }: HeroLinksProps) {
   return (
-    <ul className={cn("flex flex-wrap", iconOnly ? "gap-x-3" : "gap-x-5", className)} aria-label="Links">
+    <ul className={cn("flex flex-wrap", iconOnly ? "gap-x-(--icon-gap)" : "gap-x-5", className)} aria-label="Links">
       {links.map((link) => {
         const external = link.href.startsWith("http")
         return (
