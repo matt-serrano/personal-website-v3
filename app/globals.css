@@ -258,9 +258,8 @@
 .masthead-rule { height: 1px; margin-top: 16px; background: rgba(255, 255, 255, 0.3); }
 .masthead-caption {
   display: flex; justify-content: space-between; gap: 24px; margin-top: 12px;
-  font-size: 11px; font-weight: 600; line-height: 1.6; letter-spacing: 0.18em; text-transform: uppercase;
-  /* Brighter here, where the caption sits on the unshaded sky */
-  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--fs-caption); font-weight: var(--fw-caption); line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--tone-caption);
 }
 @media (prefers-reduced-motion: no-preference) {
   .masthead-line > span { animation: masthead-rise 500ms cubic-bezier(0.16, 1, 0.3, 1) both; }
@@ -306,8 +305,6 @@
     mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
   }
   .home .on-scene { text-shadow: none; }
-  /* 80% is the least that clears 4.5:1 at the top of the scrim */
-  .masthead-caption { color: rgba(255, 255, 255, 0.8); }
   .home .on-scene svg, .home .on-scene img { filter: none; }
   /*
    * The masthead fills the column. "MATTHEW" is 3.5623em wide, so --fs-name fits it to the column,
