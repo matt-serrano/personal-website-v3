@@ -36,7 +36,7 @@ export function Hero() {
         </div>
       </div>
       {/* On small screens the links move below the stacked list instead */}
-      <HeroLinks className="home-wide mt-4 -ml-1" />
+      <HeroLinks className="enter home-wide mt-4 -ml-1" />
     </header>
   )
 }

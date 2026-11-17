@@ -1,11 +1,11 @@
 "use client"
 
-import { useLayoutEffect, useState } from "react"
+import { useLayoutEffect, useState, type CSSProperties } from "react"
 import { LivingScene, type SceneStatus } from "@/components/living-scene"
 import { Hero, HeroLinks } from "@/components/home/hero"
 import { LocationLabel } from "@/components/home/location-label"
 import { Panel } from "@/components/home/panel"
-import { StackedList } from "@/components/home/stacked-list"
+import { LIST_ROWS, StackedList } from "@/components/home/stacked-list"
 import { TimeToggle } from "@/components/home/time-toggle"
 import { Webring } from "@/components/webring"
 import type { Zone } from "@/lib/elnido/sky"
@@ -30,27 +30,28 @@ export function HomeView() {
   return (
     <>
       <LivingScene onStatus={setStatus} zone={zone} />
-      <main className="home relative z-10">
+      {/* --list-rows: the icon row enters after the last list row (see .enter in globals.css) */}
+      <main className="home relative z-10" style={{ "--list-rows": LIST_ROWS } as CSSProperties}>
         <div className="home-hero">
           <Hero />
         </div>
-        <div className="home-panel">
+        <div className="enter home-panel">
           <Panel />
         </div>
         <div className="home-list">
           <StackedList />
         </div>
-        <div className="home-links on-scene">
+        <div className="enter home-links on-scene">
           <HeroLinks iconOnly className="flex-nowrap">
             <li>
               <TimeToggle zone={zone} onZoneChange={setZone} />
             </li>
           </HeroLinks>
         </div>
-        <div className="home-place">
+        <div className="enter home-place">
           <LocationLabel status={status} zone={zone} onZoneChange={setZone} />
         </div>
-        <div className="home-ring flex flex-wrap items-center gap-x-6">
+        <div className="enter home-ring flex flex-wrap items-center gap-x-6">
           <Webring />
         </div>
       </main>

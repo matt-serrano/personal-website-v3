@@ -414,6 +414,23 @@
   .masthead-rule { transform-origin: left; animation: masthead-draw 500ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both; }
   .masthead-caption { animation: masthead-fade 400ms ease-out 720ms both; }
 }
+/*
+ * Everything else follows the masthead in reading order, as the caption fades in: each .enter element fades up
+ * a short way on the masthead's curve, --i steps apart. Wide screens: hero links, panel, location, webring.
+ * Small screens: each list label and item (--i set inline), then the icon row and webring together.
+ */
+.home { --enter-start: 760ms; --enter-step: 60ms; }
+.home-wide.enter { --i: 0; }
+.home-panel { --i: 1; }
+.home-place { --i: 2; }
+.home-ring { --i: 3; }
+@media (max-width: 1023px), (max-width: 1200px) and (orientation: portrait) {
+  .home-links, .home-ring { --i: var(--list-rows, 9); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .enter { animation: enter-rise 600ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--enter-start) + var(--i, 0) * var(--enter-step)) both; }
+}
+@keyframes enter-rise { from { opacity: 0; transform: translateY(0.75rem); } }
 @keyframes masthead-rise { from { transform: translateY(100%); } }
 @keyframes masthead-draw { from { transform: scaleX(0); } }
 @keyframes masthead-fade { from { opacity: 0; } }

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react"
 import { ArrowUpRight } from "lucide-react"
 import { experience, projects, type PanelItem } from "@/lib/content"
 
@@ -6,7 +7,13 @@ const GROUPS = [
   { id: "projects", label: "Projects", items: projects },
 ] as const
 
-const titleHead = (t: string) => t.slice(0, t.lastIndexOf(" ") + 1)
+// Entrance order: each section label, then its items, top to bottom (see .enter in globals.css)
+const ORDER = GROUPS.map((_, gi) => GROUPS.slice(0, gi).reduce((n, g) => n + 1 + g.items.length, 0))
+/** The number of list rows; the icon row enters right after them. */
+export const LIST_ROWS = GROUPS.reduce((n, g) => n + 1 + g.items.length, 0)
+const enterAt = (i: number) => ({ "--i": i }) as CSSProperties
+
+const titleHead =(t: string) => t.slice(0, t.lastIndexOf(" ") + 1)
 const titleTail = (t: string) => t.slice(t.lastIndexOf(" ") + 1)
 
 /**
@@ -16,14 +23,14 @@ const titleTail = (t: string) => t.slice(t.lastIndexOf(" ") + 1)
 export function StackedList() {
   return (
     <div className="on-scene flex flex-col gap-(--space-48) text-left">
-      {GROUPS.map((g) => (
+      {GROUPS.map((g, gi) => (
         <section key={g.id} aria-labelledby={`list-${g.id}`}>
-          <h2 id={`list-${g.id}`} className="type-label">
+          <h2 id={`list-${g.id}`} className="type-label enter" style={enterAt(ORDER[gi])}>
             {g.label}
           </h2>
           <ul className="mt-(--space-16) flex flex-col gap-(--space-24)">
-            {g.items.map((item) => (
-              <li key={item.title}>
+            {g.items.map((item, i) => (
+              <li key={item.title} className="enter" style={enterAt(ORDER[gi] + 1 + i)}>
                 <Item item={item} />
               </li>
             ))}
