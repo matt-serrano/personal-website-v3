@@ -259,8 +259,9 @@
     drop-shadow(0 0 calc(var(--frame-h) * 12 / 844) rgba(244, 241, 230, 0.55))
     drop-shadow(0 0 calc(var(--frame-h) * 40 / 844) rgba(180, 200, 255, 0.25));
 }
+/* The radius only keeps the background off the box's corners; the mask draws the soft edge inside it */
 .scene-moon-disc {
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; border-radius: 50%;
   background:
     /* faint surface texture, about 6% */
     radial-gradient(16% 13% at 30% 66%, rgba(92, 88, 76, 0.07), transparent),
@@ -273,6 +274,19 @@
     radial-gradient(closest-side, #000 94%, transparent),
     radial-gradient(47% 47% at 62% 37%, transparent 93%, #000);
   mask-composite: intersect;
+}
+/* Its light on the water (components/moonlight.tsx): fills the frame, shows with the moon */
+.scene-moonlight {
+  position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+  opacity: var(--moon-a, 0); transition: opacity 0.8s ease; mix-blend-mode: screen;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* A slow drift of light across the ripples */
+  .moonlight-band { animation: moonlight-shimmer 7s ease-in-out infinite; }
+}
+@keyframes moonlight-shimmer {
+  0%, 100% { opacity: 0.45; transform: translateX(-5px); }
+  50% { opacity: 1; transform: translateX(5px); }
 }
 /* Development-only preview console (?controls) */
 .scene-console {

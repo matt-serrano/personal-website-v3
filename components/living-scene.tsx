@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { Moonlight } from "@/components/moonlight"
 import { buildMask } from "@/lib/elnido/masks"
 import { FS, VS } from "@/lib/elnido/shader"
 import { ASP, BAKED, LOOK, MOON, SRC, fmt, label, nowHour, plateImage, posterImage, posterPlate, sky, skyAt, type Plate, type Zone } from "@/lib/elnido/sky"
@@ -309,6 +310,7 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
       />
       {/* Laid over the photo at its own size and crop, so anything in it stays on its spot in the photo */}
       <div ref={frameRef} className="scene-frame" aria-hidden="true">
+        <Moonlight />
         <div className="scene-moon">
           <div className="scene-moon-disc" />
         </div>
