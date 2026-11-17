@@ -44,7 +44,7 @@
   /* ---------- home design tokens (desktop values; small screens override below) ---------- */
   /* Every size is in rem, so the whole home page scales with the root font size (16px = the design values) */
   /* Type sizes */
-  --fs-name: clamp(4rem, 10vw, 8rem);
+  --fs-name: clamp(4.6rem, 11.5vw, 9.2rem);
   --fs-caption: 0.8125rem;
   --fs-label: 0.8125rem;
   --fs-title: 1.375rem;
@@ -105,7 +105,11 @@
 /* Small screens (phones and portrait tablets, the same query as the centered layout) */
 @media (max-width: 1023px), (max-width: 1200px) and (orientation: portrait) {
   :root {
-    --fs-name: 3.9rem;
+    /* Capped at the column: "MATTHEW" in Anton is 3.5625 times its font size wide */
+    --fs-name: min(
+      4.485rem,
+      (min(var(--container), 100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) - 2 * var(--gutter)) / 3.5625
+    );
     --fs-caption: 0.75rem;
     --fs-label: 0.75rem;
     --fs-title: 1.1875rem;
