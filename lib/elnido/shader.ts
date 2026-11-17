@@ -1,4 +1,5 @@
-// WebGL shaders for the El Nido scene, unchanged from design/elnido-scene/index.html.
+// WebGL shaders for the El Nido scene, from design/elnido-scene/index.html. The moon is drawn over the
+// canvas in CSS (.scene-moon); the shader only uses its position to keep twinkling stars off it.
 
 export const VS = 'attribute vec2 p; varying vec2 vS; void main(){ vS = vec2(p.x*0.5+0.5, 0.5-p.y*0.5); gl_Position = vec4(p,0.,1.); }';
 export const FS = [
@@ -10,8 +11,8 @@ export const FS = [
   'uniform vec2 uvS, uvO;',
   'uniform vec4 sun;',      // xy pos, radius, strength
   'uniform vec3 sunCol;',
-  'uniform vec4 moon;',     // xy pos, radius, strength
-  'uniform float moonPhase, warmth;',
+  'uniform vec3 moon;',     // xy pos, radius
+  'uniform float warmth;',
   'float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }',
   'float n(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);',
   '  return mix(mix(h(i),h(i+vec2(1,0)),f.x), mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x), f.y); }',
@@ -77,17 +78,7 @@ export const FS = [
   '  col += sunCol * sGlow * sun.w * (0.2 + 0.8*skyOcc);',
   '  vec3 core = mix(sunCol, vec3(1.0, 0.97, 0.88), 0.5 - 0.35*smoothstep(0.0, 1.0, sdist/sun.z)) * 1.3;',
   '  col = mix(col, core, sDisc * skyCut * sun.w);',
-  '  vec2 mv = (uv - moon.xy) * vec2(asp, 1.0); float md = length(mv);',
-  '  float mDisc = 1.0 - smoothstep(moon.z*0.9, moon.z, md);',
-  '  vec2 mp = mv / moon.z; float wy = sqrt(max(1.0 - mp.y*mp.y, 0.0));',
-  '  float tx = cos(6.2831853*moonPhase) * wy; float sgn = moonPhase < 0.5 ? 1.0 : -1.0;',
-  '  float lit = smoothstep(tx - 0.06, tx + 0.06, mp.x * sgn);',
-  '  float crater = 0.86 + 0.14*fbm(mp*3.0 + 4.0);',
-  '  float illum = 0.5 - 0.5*cos(6.2831853*moonPhase);',
-  '  vec3 moonC = vec3(0.96,0.95,0.90)*crater;',
-  '  float mGlow = exp(-md / (moon.z*2.5)) * 0.4 * illum;',
-  '  col += vec3(0.75,0.82,1.0) * mGlow * moon.w * skyOcc;',
-  '  col = mix(col, moonC, mDisc * lit * skyCut * moon.w);',
+  '  float md = length((uv - moon.xy) * vec2(asp, 1.0));',
   // sun glitter path on the water under a low sun
   '  float lowSun = step(sun.y, 0.398) * (1.0 - smoothstep(0.08, 0.30, 0.40 - sun.y));',
   '  float path = exp(-abs(uv.x - sun.x) * mix(60.0, 14.0, persp)) * water * smoothstep(0.40, 0.46, uv.y);',
@@ -109,7 +100,7 @@ export const FS = [
   // twinkling stars, kept off the moon
   '  vec2 px = vec2(2.5/2752.0, 2.5/1536.0);',
   '  float nb = 0.25*(lumAt(u2+vec2(px.x,0.0)) + lumAt(u2-vec2(px.x,0.0)) + lumAt(u2+vec2(0.0,px.y)) + lumAt(u2-vec2(0.0,px.y)));',
-  '  float starPix = smoothstep(0.05, 0.16, lumAt(u2) - nb) * skyOcc * stars * (1.0 - mDisc) * smoothstep(moon.z*1.2, moon.z*3.0, md);',
+  '  float starPix = smoothstep(0.05, 0.16, lumAt(u2) - nb) * skyOcc * stars * smoothstep(moon.z*1.2, moon.z*3.0, md);',
   '  vec2 cell = floor(uv*vec2(900.,500.));',
   '  float tw = sin(t*(2.0 + 3.0*h(cell)) + 6.283*h(cell+3.1));',
   '  col *= 1.0 + starPix * tw * 0.45;',

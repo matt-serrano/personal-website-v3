@@ -26,6 +26,7 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
   const posterRef = useRef<HTMLDivElement>(null)
   const glRef = useRef<HTMLCanvasElement>(null)
   const birdsRef = useRef<HTMLCanvasElement>(null)
+  const frameRef = useRef<HTMLDivElement>(null)
   const consoleRef = useRef<HTMLDivElement>(null)
   const onStatusRef = useRef(onStatus)
   const zoneRef = useRef(zone)
@@ -45,6 +46,7 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
     const poster = posterRef.current!
     const canvas = glRef.current!
     const birdsCv = birdsRef.current!
+    const frameEl = frameRef.current!
     const params = new URLSearchParams(location.search)
     const controls = IS_DEV && params.has("controls")
     const consoleEl = controls ? consoleRef.current : null
@@ -111,8 +113,19 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW)
       const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
       const U: Record<string, WebGLUniformLocation | null> = {};
-      ["tA","tB","tM","mixF","t","ripple","sparkle","fog","stars","lantern","drift","asp","fogC","bakedA","bakedB","uvS","uvO","sun","sunCol","moon","moonPhase","warmth"].forEach(function (k) { U[k] = gl.getUniformLocation(prog, k) })
+      ["tA","tB","tM","mixF","t","ripple","sparkle","fog","stars","lantern","drift","asp","fogC","bakedA","bakedB","uvS","uvO","sun","sunCol","moon","warmth"].forEach(function (k) { U[k] = gl.getUniformLocation(prog, k) })
       gl.uniform1f(U.asp, ASP)
+
+      // The CSS moon, in image coordinates; written only when it changes
+      let lastMoon = ""
+      function placeMoon(x: number, y: number, a: number) {
+        const key = x.toFixed(4) + "," + y.toFixed(4) + "," + a.toFixed(3)
+        if (key === lastMoon) return
+        lastMoon = key
+        frameEl.style.setProperty("--moon-x", x.toFixed(4))
+        frameEl.style.setProperty("--moon-y", y.toFixed(4))
+        frameEl.style.setProperty("--moon-a", a.toFixed(3))
+      }
 
       function newTex() { const tx = gl!.createTexture()!; ownTextures.push(tx); gl!.bindTexture(gl!.TEXTURE_2D, tx)
         gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MIN_FILTER, gl!.LINEAR); gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MAG_FILTER, gl!.LINEAR)
@@ -227,8 +240,8 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
           let moonW = clamp01((sk.em + 1) / 3) * dark * dark * (3 - 2 * dark)
           // keep it in the open sky: it fades into the haze before it can reach the islands
           moonW *= 1 - clamp01((mpos[1] - 0.22) / 0.08)
-          gl!.uniform4f(U.moon, mpos[0], mpos[1], 0.03, moonW)
-          gl!.uniform1f(U.moonPhase, sk.phase)
+          gl!.uniform3f(U.moon, mpos[0], mpos[1], 0.03)
+          placeMoon(mpos[0], mpos[1], moonW)
           gl!.uniform1f(U.stars, clamp01((-sk.e - 4) / 8))
 
           gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4)
@@ -300,6 +313,12 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
         role="img"
         aria-label="The Big Lagoon in El Nido, Palawan, lit by the real sun and moon for your time of day"
       />
+      {/* Laid over the photo at its own size and crop, so anything in it stays on its spot in the photo */}
+      <div ref={frameRef} className="scene-frame" aria-hidden="true">
+        <div className="scene-moon">
+          <div className="scene-moon-disc" />
+        </div>
+      </div>
       <canvas ref={birdsRef} className="scene-birds" aria-hidden="true" />
       {IS_DEV ? (
         <div ref={consoleRef} className="scene-console" role="group" aria-label="Scene time (development)" hidden>

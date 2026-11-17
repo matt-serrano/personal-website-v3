@@ -231,6 +231,45 @@
 .scene-gl.ready { opacity: 1; }
 .scene-gl[hidden] { display: none; }
 .scene-birds { pointer-events: none; }
+/*
+ * The photo's own box: cover-sized and cropped at --scene-position (center 60%), exactly as the poster and the
+ * WebGL scene are, so a child placed in percentages of it stays on the same spot in the photo at any screen size.
+ * Inside it, 1cqh is 1% of the photo's height.
+ */
+.scene { container-type: size; }
+.scene-frame {
+  --frame-w: max(100cqw, 100cqh * 2752 / 1536);
+  --frame-h: max(100cqh, 100cqw * 1536 / 2752);
+  position: absolute; width: var(--frame-w); height: var(--frame-h);
+  left: calc((100cqw - var(--frame-w)) * 0.5); top: calc((100cqh - var(--frame-h)) * 0.6);
+  container-type: size; pointer-events: none;
+}
+/*
+ * The moon: a full disc with a second, offset disc masked out of it, so every edge is a soft curve. The lit
+ * limb is brightest; the glow (12px and 40px on an 844px-tall photo) scales with the photo, and screen blends
+ * it into the sky. --moon-x, --moon-y: centre in photo fractions; --moon-r: radius in photo heights.
+ */
+.scene-moon {
+  position: absolute; left: calc(var(--moon-x, 0.5) * 100%); top: calc(var(--moon-y, 0.25) * 100%);
+  width: calc(var(--moon-r, 0.03) * 200cqh); aspect-ratio: 1; translate: -50% -50%;
+  opacity: var(--moon-a, 0); mix-blend-mode: screen;
+  filter: drop-shadow(0 0 1.4cqh rgba(244, 241, 230, 0.55)) drop-shadow(0 0 4.75cqh rgba(180, 200, 255, 0.25));
+}
+.scene-moon-disc {
+  position: absolute; inset: 0;
+  background:
+    /* faint surface texture, about 6% */
+    radial-gradient(16% 13% at 30% 66%, rgba(92, 88, 76, 0.07), transparent),
+    radial-gradient(11% 9% at 20% 47%, rgba(92, 88, 76, 0.06), transparent),
+    radial-gradient(13% 10% at 47% 84%, rgba(92, 88, 76, 0.05), transparent),
+    /* dimmest along the inner curve, brightest at the lit limb */
+    radial-gradient(circle farthest-corner at 62% 37%, #d9d4c5 53%, #f4f1e6 65%, #fffdf7 78%);
+  /* the disc, minus the offset disc that leaves the crescent */
+  mask-image:
+    radial-gradient(closest-side, #000 94%, transparent),
+    radial-gradient(47% 47% at 62% 37%, transparent 93%, #000);
+  mask-composite: intersect;
+}
 /* Development-only preview console (?controls) */
 .scene-console {
   position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
