@@ -41,50 +41,48 @@ export function StackedList() {
   )
 }
 
-/** An item with a logo: the mark on the left, centred on the title and line. */
+/** Projects link out and carry ↗; experience entries are plain text so they never look tappable. A logo sits left of the title. */
 function Item({ item }: { item: PanelItem }) {
-  if (!item.logo) return <ItemText item={item} />
-  return (
-    <div className="flex items-center gap-(--space-12)">
-      {/* The company is named in the line beside it, so the mark is decorative */}
-      <img src={item.logo} alt="" className="item-logo" />
-      <div className="min-w-0">
-        <ItemText item={item} />
-      </div>
-    </div>
+  const title = (
+    <h3 className="type-title min-w-0">
+      {item.href ? (
+        <a
+          href={item.href}
+          target="_blank"
+          rel="noreferrer"
+          // The ::after pads the hit area to 44px tall without moving anything
+          className="relative inline-block underline-offset-4 decoration-1 after:absolute after:-inset-x-1 after:-inset-y-[0.8125rem] after:content-[''] hover:underline"
+        >
+          {titleHead(item.title)}
+          {/* The last word and the arrow stay together, so a wrapped title keeps its arrow beside it */}
+          <span className="whitespace-nowrap">
+            {titleTail(item.title)}
+            <ArrowUpRight
+              strokeWidth={2}
+              aria-hidden="true"
+              focusable="false"
+              className="ml-1.5 inline-block size-4 align-[-0.1em] opacity-80"
+            />
+          </span>
+          <span className="sr-only"> (opens in a new tab)</span>
+        </a>
+      ) : (
+        item.title
+      )}
+    </h3>
   )
-}
-
-/** Projects link out and carry ↗; experience entries are plain text so they never look tappable. */
-function ItemText({ item }: { item: PanelItem }) {
   return (
     <>
-      <h3 className="type-title">
-        {item.href ? (
-          <a
-            href={item.href}
-            target="_blank"
-            rel="noreferrer"
-            // The ::after pads the hit area to 44px tall without moving anything
-            className="relative inline-block underline-offset-4 decoration-1 after:absolute after:-inset-x-1 after:-inset-y-[0.8125rem] after:content-[''] hover:underline"
-          >
-            {titleHead(item.title)}
-            {/* The last word and the arrow stay together, so a wrapped title keeps its arrow beside it */}
-            <span className="whitespace-nowrap">
-              {titleTail(item.title)}
-              <ArrowUpRight
-                strokeWidth={2}
-                aria-hidden="true"
-                focusable="false"
-                className="ml-1.5 inline-block size-4 align-[-0.1em] opacity-80"
-              />
-            </span>
-            <span className="sr-only"> (opens in a new tab)</span>
-          </a>
-        ) : (
-          item.title
-        )}
-      </h3>
+      {/* A logo sits beside the title only, at the title's height; the line stays under it at the column's edge.
+          The company is named in that line, so the mark is decorative. */}
+      {item.logo ? (
+        <div className="flex items-center gap-(--space-8)">
+          <img src={item.logo} alt="" className="item-logo" />
+          {title}
+        </div>
+      ) : (
+        title
+      )}
       <p className="type-subtitle mt-(--space-4)">
         {item.line}
         {item.date ? <span className="whitespace-nowrap"> · {item.date}</span> : null}

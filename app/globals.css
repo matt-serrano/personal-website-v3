@@ -380,9 +380,10 @@
   background: radial-gradient(ellipse closest-side at center, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.12) 50%, transparent 75%);
 }
 
-/* A company's mark beside an experience item: white on transparent, about as tall as the title and line */
+/* A company's mark beside an experience title: white on transparent, exactly one title line tall */
 .item-logo {
-  flex: none; width: var(--logo-size, 2.5rem); height: var(--logo-size, 2.5rem); object-fit: contain;
+  --logo-size: calc(var(--fs-title) * var(--lh-title));
+  flex: none; width: var(--logo-size); height: var(--logo-size); object-fit: contain;
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
 }
 
