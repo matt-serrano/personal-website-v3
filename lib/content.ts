@@ -36,7 +36,7 @@ export type PanelItem = {
 export const experience: PanelItem[] = [
   {
     title: "IT Systems Analyst",
-    line: "Ontario Public Service",
+    line: "Ontario Government",
     date: "May 2026 – Present",
     description:
       "Government of Ontario, Ministry of Public and Business Service Delivery and Procurement, Natural Resources Solutions Division.",
@@ -53,7 +53,7 @@ export const experience: PanelItem[] = [
 export const projects: PanelItem[] = [
   {
     title: "Natural Resources Information Portal",
-    line: "Ontario Public Service · Salesforce",
+    line: "Ontario Government · Salesforce",
     description: "Ontario's public portal for natural resources information, services and applications.",
     href: "https://nrip.mnr.gov.on.ca/s/?language=en_US",
   },
