@@ -31,11 +31,14 @@ export type PanelItem = {
   date?: string
   description: string
   href?: string
+  /** A white mark on a transparent background, shown to the left of the item. */
+  logo?: string
 }
 
 export const experience: PanelItem[] = [
   {
     title: "IT Systems Analyst",
+    logo: "/logos/ontario.png",
     line: "Ontario Government",
     date: "May 2026 – Present",
     description:
@@ -43,6 +46,7 @@ export const experience: PanelItem[] = [
   },
   {
     title: "Software Engineer Intern",
+    logo: "/logos/purchs.png",
     line: "Purchs",
     date: "November 2025 – March 2026",
     description: "AI wholesale platform for CPG brands & retailers.",

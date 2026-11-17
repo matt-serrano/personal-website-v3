@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, type KeyboardEvent } from "react"
+import { useRef, useState, type CSSProperties, type KeyboardEvent } from "react"
 import { ArrowUpRight } from "lucide-react"
 import { LineArrow } from "@/components/line-arrow"
 import { experience, projects, type PanelItem } from "@/lib/content"
@@ -76,26 +76,30 @@ export function Panel() {
             {group.label} {i + 1} of {total}: {item.title}
           </span>
         </p>
-        <h2 className="type-title mt-2">
-          {item.href ? (
-            <a href={item.href} target="_blank" rel="noreferrer" className="underline-offset-[0.375rem] decoration-1 hover:underline">
-              {titleHead(item.title)}
-              {/* The last word and the icon stay together so the icon never wraps onto a line alone */}
-              <span className="whitespace-nowrap">
-                {titleTail(item.title)}
-                <ArrowUpRight
-                  strokeWidth={1.75}
-                  aria-hidden="true"
-                  focusable="false"
-                  className="ml-1 inline-block size-5 align-[0.1em] opacity-80"
-                />
-              </span>
-              <span className="sr-only"> (opens in a new tab)</span>
-            </a>
-          ) : (
-            item.title
-          )}
-        </h2>
+        <div className={cn("mt-2", item.logo && "flex items-center gap-(--space-8)")}>
+          {/* Beside the title only, so the line below keeps the panel's full width; the company is named there, so the mark is decorative */}
+          {item.logo ? <img src={item.logo} alt="" className="item-logo" style={{ "--logo-size": "1.75rem" } as CSSProperties} /> : null}
+          <h2 className="type-title min-w-0">
+            {item.href ? (
+              <a href={item.href} target="_blank" rel="noreferrer" className="underline-offset-[0.375rem] decoration-1 hover:underline">
+                {titleHead(item.title)}
+                {/* The last word and the icon stay together so the icon never wraps onto a line alone */}
+                <span className="whitespace-nowrap">
+                  {titleTail(item.title)}
+                  <ArrowUpRight
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                    focusable="false"
+                    className="ml-1 inline-block size-5 align-[0.1em] opacity-80"
+                  />
+                </span>
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            ) : (
+              item.title
+            )}
+          </h2>
+        </div>
         <p className="type-subtitle mt-2">
           {item.line}
           {item.date ? (

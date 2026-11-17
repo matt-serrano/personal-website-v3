@@ -41,8 +41,22 @@ export function StackedList() {
   )
 }
 
-/** Projects link out and carry ↗; experience entries are plain text so they never look tappable. */
+/** An item with a logo: the mark on the left, centred on the title and line. */
 function Item({ item }: { item: PanelItem }) {
+  if (!item.logo) return <ItemText item={item} />
+  return (
+    <div className="flex items-center gap-(--space-12)">
+      {/* The company is named in the line beside it, so the mark is decorative */}
+      <img src={item.logo} alt="" className="item-logo" />
+      <div className="min-w-0">
+        <ItemText item={item} />
+      </div>
+    </div>
+  )
+}
+
+/** Projects link out and carry ↗; experience entries are plain text so they never look tappable. */
+function ItemText({ item }: { item: PanelItem }) {
   return (
     <>
       <h3 className="type-title">

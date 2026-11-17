@@ -380,6 +380,12 @@
   background: radial-gradient(ellipse closest-side at center, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.12) 50%, transparent 75%);
 }
 
+/* A company's mark beside an experience item: white on transparent, about as tall as the title and line */
+.item-logo {
+  flex: none; width: var(--logo-size, 2.5rem); height: var(--logo-size, 2.5rem); object-fit: contain;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
 /* Line arrows take their size from the tokens, so they scale with the rest of the page */
 .line-arrow { width: var(--arrow-width); height: var(--arrow-height); }
 
