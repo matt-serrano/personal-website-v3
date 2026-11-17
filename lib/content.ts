@@ -42,7 +42,7 @@ export const experience: PanelItem[] = [
     line: "Ontario Government",
     date: "May 2026 – Present",
     description:
-      "Government of Ontario, Ministry of Public and Business Service Delivery and Procurement, Natural Resources Solutions Division.",
+      "Ministry of Public and Business Service Delivery and Procurement, Natural Resources Solutions Division.",
   },
   {
     title: "Software Engineer Intern",
