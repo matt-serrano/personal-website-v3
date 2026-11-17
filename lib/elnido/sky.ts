@@ -97,8 +97,9 @@ export function label(s: Sky) {
   if (s.e < 20) return s.morning ? "Morning light" : "Golden hour"
   return "Daytime"
 }
-// On-screen path: rises right of the valley, climbs out of frame, sets behind the far islands
-export function skyPos(Hdeg: number, elev: number): [number, number] { return [0.54 - 0.0003 * Hdeg, 0.398 - 0.0115 * elev] }
+// The moon, drawn over the night photo (.scene-moon): in open sky above the far islands, straight above the
+// bright streak of moonlight on the water (centre x/y in image fractions, radius r in image heights)
+export const MOON = { x: 0.565, y: 0.3, r: 0.022 }
 
 // "local" is the visitor's clock; El Nido keeps Philippine time, UTC+8 with no daylight saving
 export type Zone = "local" | "elnido"

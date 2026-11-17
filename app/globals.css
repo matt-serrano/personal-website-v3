@@ -234,7 +234,8 @@
 /*
  * The photo's own box: cover-sized and cropped at --scene-position (center 60%), exactly as the poster and the
  * WebGL scene are, so a child placed in percentages of it stays on the same spot in the photo at any screen size.
- * Inside it, 1cqh is 1% of the photo's height.
+ * --frame-h is the photo's height, for sizing children with it. The frame itself must not form a stacking context
+ * (no container, z-index or opacity), or the layers in it could only blend with each other, not with the photo.
  */
 .scene { container-type: size; }
 .scene-frame {
@@ -242,18 +243,21 @@
   --frame-h: max(100cqh, 100cqw * 1536 / 2752);
   position: absolute; width: var(--frame-w); height: var(--frame-h);
   left: calc((100cqw - var(--frame-w)) * 0.5); top: calc((100cqh - var(--frame-h)) * 0.6);
-  container-type: size; pointer-events: none;
+  pointer-events: none;
 }
 /*
  * The moon: a full disc with a second, offset disc masked out of it, so every edge is a soft curve. The lit
  * limb is brightest; the glow (12px and 40px on an 844px-tall photo) scales with the photo, and screen blends
- * it into the sky. --moon-x, --moon-y: centre in photo fractions; --moon-r: radius in photo heights.
+ * it into the sky. --moon-x, --moon-y: centre in photo fractions; --moon-r: radius in photo heights (MOON in
+ * lib/elnido/sky.ts); --moon-a: how much the night photo shows.
  */
 .scene-moon {
-  position: absolute; left: calc(var(--moon-x, 0.5) * 100%); top: calc(var(--moon-y, 0.25) * 100%);
-  width: calc(var(--moon-r, 0.03) * 200cqh); aspect-ratio: 1; translate: -50% -50%;
-  opacity: var(--moon-a, 0); mix-blend-mode: screen;
-  filter: drop-shadow(0 0 1.4cqh rgba(244, 241, 230, 0.55)) drop-shadow(0 0 4.75cqh rgba(180, 200, 255, 0.25));
+  position: absolute; left: calc(var(--moon-x) * 100%); top: calc(var(--moon-y) * 100%);
+  width: calc(var(--moon-r) * 2 * var(--frame-h)); aspect-ratio: 1; translate: -50% -50%;
+  opacity: var(--moon-a, 0); transition: opacity 0.8s ease; mix-blend-mode: screen;
+  filter:
+    drop-shadow(0 0 calc(var(--frame-h) * 12 / 844) rgba(244, 241, 230, 0.55))
+    drop-shadow(0 0 calc(var(--frame-h) * 40 / 844) rgba(180, 200, 255, 0.25));
 }
 .scene-moon-disc {
   position: absolute; inset: 0;

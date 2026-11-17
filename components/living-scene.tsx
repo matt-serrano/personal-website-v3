@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react"
 import { buildMask } from "@/lib/elnido/masks"
 import { FS, VS } from "@/lib/elnido/shader"
-import { ASP, BAKED, LOOK, SRC, fmt, label, nowHour, plateImage, posterImage, posterPlate, sky, skyAt, skyPos, type Plate, type Zone } from "@/lib/elnido/sky"
+import { ASP, BAKED, LOOK, MOON, SRC, fmt, label, nowHour, plateImage, posterImage, posterPlate, sky, skyAt, type Plate, type Zone } from "@/lib/elnido/sky"
 
 export type SceneStatus = { label: string; clock: string; mode: "live" | "elnido" | "preview" | "playing" }
 
@@ -72,6 +72,16 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
       onStatusRef.current?.({ label: lb, clock, mode })
     }
 
+    // The moon belongs to the night photo: it shows as much as that photo does, and is written only when it changes
+    frameEl.style.setProperty("--moon-x", String(MOON.x))
+    frameEl.style.setProperty("--moon-y", String(MOON.y))
+    frameEl.style.setProperty("--moon-r", String(MOON.r))
+    let lastMoon = ""
+    function showMoon(a: number) {
+      const v = a.toFixed(3)
+      if (v !== lastMoon) { lastMoon = v; frameEl.style.setProperty("--moon-a", v) }
+    }
+
     const s0 = skyAt(state.hour, zoneRef.current)
     poster.style.backgroundImage = posterImage(posterPlate(s0))
 
@@ -86,6 +96,7 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
     function startUIOnly() {
       const h = state.live ? nowHour(zoneRef.current) : state.hour, s = skyAt(h, zoneRef.current)
       poster.style.backgroundImage = posterImage(posterPlate(s))
+      showMoon(posterPlate(s) === "night" ? 1 : 0)
       report(h, label(s))
     }
     redrawRef.current = startUIOnly
@@ -115,17 +126,7 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
       const U: Record<string, WebGLUniformLocation | null> = {};
       ["tA","tB","tM","mixF","t","ripple","sparkle","fog","stars","lantern","drift","asp","fogC","bakedA","bakedB","uvS","uvO","sun","sunCol","moon","warmth"].forEach(function (k) { U[k] = gl.getUniformLocation(prog, k) })
       gl.uniform1f(U.asp, ASP)
-
-      // The CSS moon, in image coordinates; written only when it changes
-      let lastMoon = ""
-      function placeMoon(x: number, y: number, a: number) {
-        const key = x.toFixed(4) + "," + y.toFixed(4) + "," + a.toFixed(3)
-        if (key === lastMoon) return
-        lastMoon = key
-        frameEl.style.setProperty("--moon-x", x.toFixed(4))
-        frameEl.style.setProperty("--moon-y", y.toFixed(4))
-        frameEl.style.setProperty("--moon-a", a.toFixed(3))
-      }
+      gl.uniform3f(U.moon, MOON.x, MOON.y, MOON.r)
 
       function newTex() { const tx = gl!.createTexture()!; ownTextures.push(tx); gl!.bindTexture(gl!.TEXTURE_2D, tx)
         gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MIN_FILTER, gl!.LINEAR); gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MAG_FILTER, gl!.LINEAR)
@@ -233,15 +234,8 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
           gl!.uniform3f(U.sunCol, sunC[0], sunC[1], sunC[2])
           gl!.uniform1f(U.warmth, clamp01((sk.e - 2) / 6) * clamp01((24 - sk.e) / 14) * 0.85)
 
-          // Moon: today's phase on its nightly arc, faint by day
-          const mpos = skyPos(sk.Hm, sk.em)
-          // Moon appears only once the sun is down: fades in through dusk, gone before dawn
-          const dark = clamp01((-sk.e - 1) / 6)
-          let moonW = clamp01((sk.em + 1) / 3) * dark * dark * (3 - 2 * dark)
-          // keep it in the open sky: it fades into the haze before it can reach the islands
-          moonW *= 1 - clamp01((mpos[1] - 0.22) / 0.08)
-          gl!.uniform3f(U.moon, mpos[0], mpos[1], 0.03)
-          placeMoon(mpos[0], mpos[1], moonW)
+          // Moon: fades in and out with the night photo, so it is only ever over the sky it lights
+          showMoon((nameA === "night" ? 1 - f : 0) + (nameB === "night" ? f : 0))
           gl!.uniform1f(U.stars, clamp01((-sk.e - 4) / 8))
 
           gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4)
