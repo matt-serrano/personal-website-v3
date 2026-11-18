@@ -226,11 +226,15 @@ export function LivingScene({ onStatus, zone = "local" }: Props) {
 
           // Sun: size, colour and strength from its height
           // Sun drops almost straight down onto the light path in each photo: the morning glow sits right of the valley, the sunset streak at its centre
-          const sp = [sk.morning ? 0.5675 + 0.0005 * Math.max(sk.e, 0) : 0.5075 + 0.0003 * Math.max(sk.e, 0), 0.398 - 0.0115 * sk.e]
-          const lowS = clamp01(1 - sk.e / 25)
+          // The sunset photo has the sun's streak painted on the water, so while it shows, the sun never drops out of
+          // sight: it rests half-set on the far islands above the streak and fades out with the photo as night takes over
+          const sunsetW = (nameA === "sunset" ? 1 - f : 0) + (nameB === "sunset" ? f : 0)
+          const eSun = sunsetW > 0 ? Math.max(sk.e, 2) : sk.e
+          const sp = [sk.morning ? 0.5675 + 0.0005 * Math.max(eSun, 0) : 0.5075 + 0.0003 * Math.max(eSun, 0), 0.398 - 0.0115 * eSun]
+          const lowS = clamp01(1 - eSun / 25)
           const sunR = lerp(0.019, 0.034, lowS * lowS)
           const sunC = [1.0, lerp(0.97, 0.62, lowS), lerp(0.88, 0.32, lowS)]
-          const sunW = clamp01((sk.e + 1.5) / 3)
+          const sunW = Math.max(clamp01((sk.e + 1.5) / 3), sunsetW)
           gl!.uniform4f(U.sun, sp[0], sp[1], sunR, sunW)
           gl!.uniform3f(U.sunCol, sunC[0], sunC[1], sunC[2])
           gl!.uniform1f(U.warmth, clamp01((sk.e - 2) / 6) * clamp01((24 - sk.e) / 14) * 0.85)
